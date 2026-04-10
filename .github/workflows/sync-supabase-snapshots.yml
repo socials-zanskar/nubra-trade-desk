@@ -26,6 +26,8 @@ jobs:
         env:
           PHONE_NO: ${{ secrets.PHONE_NO }}
           MPIN: ${{ secrets.MPIN }}
+          NUBRA_TOTP_SECRET: ${{ secrets.NUBRA_TOTP_SECRET }}
+          NUBRA_OTP: ${{ secrets.NUBRA_OTP }}
           NUBRA_OI_WALLS_ENV: PROD
           NUBRA_APP_ENV: production
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

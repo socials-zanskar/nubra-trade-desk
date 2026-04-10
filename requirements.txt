@@ -4,6 +4,7 @@ plotly>=5.24
 psycopg[binary]>=3.2
 python-dotenv>=1.0
 pytz>=2024.1
+pyotp>=2.9
 nubra-sdk>=0.4.0
 nubra-oi-walls>=0.1.1
 nubra-volume-breakout>=0.1.1
