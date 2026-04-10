@@ -13,13 +13,13 @@ from .auth import load_auth_session
 from .db import (
     apply_schema,
     connect_db,
-    load_latest_alert_events,
     load_latest_index_ladder_snapshots,
     load_latest_index_multi_wall_batch,
     load_latest_index_wall_batch,
     load_latest_signal_board,
     load_latest_symbol_drilldowns,
     load_latest_volume_batch,
+    load_recent_alert_events,
     load_watchlist_symbols,
     save_watchlist_symbols as save_watchlist_symbols_db,
     store_index_multi_walls,
@@ -210,7 +210,7 @@ def _load_database_snapshot(
             merged_signals, signal_time = load_latest_signal_board(connection, chosen_symbols)
             index_multi_wall_batch, multi_wall_time = load_latest_index_multi_wall_batch(connection, INDEX_WALL_SYMBOLS)
             ladder_snapshots = load_latest_index_ladder_snapshots(connection, INDEX_WALL_SYMBOLS)
-            alert_events = load_latest_alert_events(connection, symbols=chosen_symbols)
+            alert_events = load_recent_alert_events(connection, symbols=chosen_symbols)
             watchlist_symbols = load_watchlist_symbols(connection)
             drilldown_summaries = load_latest_symbol_drilldowns(connection, chosen_symbols)
     except Exception:
