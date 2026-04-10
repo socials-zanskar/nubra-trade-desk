@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+<stop stop-color="#08131f"/><stop offset="1" stop-color="#11293c"/>
+</linearGradient>
+<linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#113052"/><stop offset="1" stop-color="#0D6C73"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1270" cy="110" r="220" fill="#0d6c73" opacity="0.08"/>
+<circle cx="140" cy="760" r="240" fill="#1f63a3" opacity="0.08"/>
+<text x="56" y="64" fill="#ffffff" font-size="18" font-family="Arial">Nubra x Streamlit Concept</text>
+<text x="56" y="112" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">Market Pulse</text>
+<rect x="56" y="150" rx="20" width="250" height="108" fill="#143149" stroke="#234a68"/>
+<text x="76" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Volume leaders</text>
+<text x="76" y="222" fill="#24c48e" font-size="34" font-weight="700" font-family="Arial">14</text>
+<rect x="326" y="150" rx="20" width="250" height="108" fill="#143149" stroke="#234a68"/>
+<text x="346" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Breakout confirmed</text>
+<text x="346" y="222" fill="#2ed3b7" font-size="34" font-weight="700" font-family="Arial">6</text>
+<rect x="596" y="150" rx="20" width="250" height="108" fill="#143149" stroke="#234a68"/>
+<text x="616" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Wall near spot</text>
+<text x="616" y="222" fill="#f8b84e" font-size="34" font-weight="700" font-family="Arial">9</text>
+<rect x="866" y="150" rx="20" width="250" height="108" fill="#143149" stroke="#234a68"/>
+<text x="886" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Strong bullish</text>
+<text x="886" y="222" fill="#57b6ff" font-size="34" font-weight="700" font-family="Arial">4</text>
+<rect x="1136" y="150" rx="20" width="250" height="108" fill="#143149" stroke="#234a68"/>
+<text x="1156" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Updated</text>
+<text x="1156" y="222" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">09:42 IST</text>
+<rect x="56" y="290" rx="26" width="908" height="550" fill="#10263a" stroke="#234a68"/>
+<text x="78" y="324" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Signal Heat</text><text x="80" y="332" fill="#88a3bb" font-size="16" font-family="Arial">Cross-market signal density</text>
+<polyline points="92,512 129.77777777777777,493.42857142857144 167.55555555555554,502.7142857142857 205.33333333333334,460.92857142857144 243.11111111111111,447 280.8888888888889,423.7857142857143 318.6666666666667,428.42857142857144 356.44444444444446,400.57142857142856 394.22222222222223,382 432,391.2857142857143" fill="none" stroke="#2ed3b7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="432" cy="391.2857142857143" r="5" fill="#2ed3b7"/>
+<polyline points="470,382 507.77777777777777,402 545.5555555555555,407 583.3333333333334,437 621.1111111111111,447 658.8888888888889,472 696.6666666666667,457 734.4444444444445,482 772.2222222222222,497 810,512" fill="none" stroke="#ff6b6b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="810" cy="512" r="5" fill="#ff6b6b"/>
+<text x="92" y="540" fill="#e8f1f8" font-size="18" font-family="Arial">Momentum pressure</text>
+<text x="470" y="540" fill="#e8f1f8" font-size="18" font-family="Arial">Resistance pressure</text>
+<rect x="92" y="580" rx="20" width="834" height="218" fill="#143149" stroke="#234a68"/>
+<rect x="126" y="703.6" width="92.5" height="62.400000000000006" rx="8" fill="#2ed3b7"/><rect x="224.5" y="684.4" width="92.5" height="81.60000000000001" rx="8" fill="#57b6ff"/><rect x="323" y="713.2" width="92.5" height="52.8" rx="8" fill="#f8b84e"/><rect x="421.5" y="672.4" width="92.5" height="93.60000000000001" rx="8" fill="#24c48e"/><rect x="520" y="726.4" width="92.5" height="39.6" rx="8" fill="#2ed3b7"/><rect x="618.5" y="680.8" width="92.5" height="85.19999999999999" rx="8" fill="#57b6ff"/><rect x="717" y="690.4" width="92.5" height="75.6" rx="8" fill="#f8b84e"/><rect x="815.5" y="697.6" width="92.5" height="68.39999999999999" rx="8" fill="#24c48e"/>
+<rect x="994" y="290" rx="26" width="550" height="550" fill="#10263a" stroke="#234a68"/>
+<text x="1016" y="324" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Priority Tape</text><rect x="1018" y="338" rx="18" width="502" height="344" fill="#143149" stroke="#234a68"/><text x="1036" y="372" fill="#88a3bb" font-size="15" font-family="Arial">Symbol</text><text x="1203.3333333333333" y="372" fill="#88a3bb" font-size="15" font-family="Arial">Signal</text><text x="1370.6666666666667" y="372" fill="#88a3bb" font-size="15" font-family="Arial">Bias</text><line x1="1034" y1="398" x2="1504" y2="398" stroke="#234a68"/><text x="1036" y="416" fill="#e8f1f8" font-size="16" font-family="Arial">NIFTY</text><text x="1203.3333333333333" y="416" fill="#24c48e" font-size="16" font-family="Arial">Put wall near</text><text x="1370.6666666666667" y="416" fill="#e8f1f8" font-size="16" font-family="Arial">Bullish</text><line x1="1034" y1="452" x2="1504" y2="452" stroke="#234a68"/><text x="1036" y="470" fill="#e8f1f8" font-size="16" font-family="Arial">RELIANCE</text><text x="1203.3333333333333" y="470" fill="#2ed3b7" font-size="16" font-family="Arial">4.1x volume</text><text x="1370.6666666666667" y="470" fill="#e8f1f8" font-size="16" font-family="Arial">Momentum</text><line x1="1034" y1="506" x2="1504" y2="506" stroke="#234a68"/><text x="1036" y="524" fill="#e8f1f8" font-size="16" font-family="Arial">BANKNIFTY</text><text x="1203.3333333333333" y="524" fill="#ff6b6b" font-size="16" font-family="Arial">Call wall near</text><text x="1370.6666666666667" y="524" fill="#e8f1f8" font-size="16" font-family="Arial">Bearish</text><line x1="1034" y1="560" x2="1504" y2="560" stroke="#234a68"/><text x="1036" y="578" fill="#e8f1f8" font-size="16" font-family="Arial">HDFCBANK</text><text x="1203.3333333333333" y="578" fill="#f8b84e" font-size="16" font-family="Arial">Clustered walls</text><text x="1370.6666666666667" y="578" fill="#e8f1f8" font-size="16" font-family="Arial">Compression</text><line x1="1034" y1="614" x2="1504" y2="614" stroke="#234a68"/><text x="1036" y="632" fill="#e8f1f8" font-size="16" font-family="Arial">INFY</text><text x="1203.3333333333333" y="632" fill="#88a3bb" font-size="16" font-family="Arial">No breakout</text><text x="1370.6666666666667" y="632" fill="#e8f1f8" font-size="16" font-family="Arial">Neutral</text>
+</svg>

@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+auth_data.db
+auth_data.db.*
+.env
+.env.local
+.env.*
+!.env.example
+.streamlit/secrets.toml
+logs/

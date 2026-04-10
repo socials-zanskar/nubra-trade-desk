@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+<stop stop-color="#08131f"/><stop offset="1" stop-color="#11293c"/>
+</linearGradient>
+<linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#113052"/><stop offset="1" stop-color="#0D6C73"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1270" cy="110" r="220" fill="#0d6c73" opacity="0.08"/>
+<circle cx="140" cy="760" r="240" fill="#1f63a3" opacity="0.08"/>
+<text x="56" y="64" fill="#ffffff" font-size="18" font-family="Arial">Nubra x Streamlit Concept</text>
+<text x="56" y="112" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">Breakout Confirmation</text>
+<rect x="56" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="76" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Selected</text>
+<text x="76" y="222" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">RELIANCE</text>
+<rect x="334" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="354" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Volume ratio</text>
+<text x="354" y="222" fill="#2ed3b7" font-size="34" font-weight="700" font-family="Arial">2.56x</text>
+<rect x="612" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="632" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Price status</text>
+<text x="632" y="222" fill="#24c48e" font-size="34" font-weight="700" font-family="Arial">Above high</text>
+<rect x="890" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="910" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Wall bias</text>
+<text x="910" y="222" fill="#f8b84e" font-size="34" font-weight="700" font-family="Arial">PUT support</text>
+<rect x="1168" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="1188" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Signal grade</text>
+<text x="1188" y="222" fill="#57b6ff" font-size="34" font-weight="700" font-family="Arial">A-</text>
+<rect x="56" y="290" rx="26" width="930" height="548" fill="#10263a" stroke="#234a68"/>
+<text x="78" y="324" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Signal Chart</text><rect x="84" y="338" rx="18" width="874" height="450" fill="#143149" stroke="#234a68"/>
+<polyline points="110,648 170,628 230,638 290,618 350,598 410,608 470,578 530,548 590,518 650,488 710,508 770,458 830,428 890,408" fill="none" stroke="#57b6ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="890" cy="408" r="5" fill="#57b6ff"/>
+<line x1="172" y1="620" x2="870" y2="620" stroke="#ff6b6b" stroke-dasharray="10 10"/>
+<line x1="172" y1="674" x2="870" y2="674" stroke="#24c48e" stroke-dasharray="10 10"/>
+<text x="880" y="624" fill="#ff6b6b" font-size="16" font-family="Arial">Call wall</text>
+<text x="880" y="678" fill="#24c48e" font-size="16" font-family="Arial">Put wall</text>
+<rect x="126" y="742.5" width="68" height="17.5" rx="8" fill="#2ed3b7"/><rect x="200" y="735.5" width="68" height="24.5" rx="8" fill="#2ed3b7"/><rect x="274" y="737.6" width="68" height="22.400000000000002" rx="8" fill="#2ed3b7"/><rect x="348" y="729.2" width="68" height="30.8" rx="8" fill="#2ed3b7"/><rect x="422" y="717.3" width="68" height="42.699999999999996" rx="8" fill="#2ed3b7"/><rect x="496" y="726.4" width="68" height="33.6" rx="8" fill="#2ed3b7"/><rect x="570" y="713.1" width="68" height="46.900000000000006" rx="8" fill="#2ed3b7"/><rect x="644" y="708.2" width="68" height="51.8" rx="8" fill="#2ed3b7"/><rect x="718" y="711.7" width="68" height="48.3" rx="8" fill="#2ed3b7"/><rect x="792" y="702.6" width="68" height="57.4" rx="8" fill="#2ed3b7"/>
+<rect x="1018" y="290" rx="26" width="526" height="548" fill="#10263a" stroke="#234a68"/>
+<text x="1040" y="324" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Decision Card</text><text x="1042" y="350" fill="#e8f1f8" font-size="20" font-family="Arial">• Volume is far above normal baseline</text>
+<text x="1042" y="398" fill="#e8f1f8" font-size="20" font-family="Arial">• Price is clearing a recent high</text>
+<text x="1042" y="446" fill="#e8f1f8" font-size="20" font-family="Arial">• Nearest dominant wall is supportive</text>
+<text x="1042" y="520" fill="#2ed3b7" font-size="24" font-weight="700" font-family="Arial">This is the key “useful” page for users.</text>
+<rect x="1042" y="586" rx="16" width="206" height="48" fill="#2ed3b7"/>
+<text x="1090" y="616" fill="#082132" font-size="18" font-weight="700" font-family="Arial">Add Alert</text>
+</svg>

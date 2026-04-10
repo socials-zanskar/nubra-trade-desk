@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+<stop stop-color="#08131f"/><stop offset="1" stop-color="#11293c"/>
+</linearGradient>
+<linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#113052"/><stop offset="1" stop-color="#0D6C73"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1270" cy="110" r="220" fill="#0d6c73" opacity="0.08"/>
+<circle cx="140" cy="760" r="240" fill="#1f63a3" opacity="0.08"/>
+<text x="56" y="64" fill="#ffffff" font-size="18" font-family="Arial">Nubra x Streamlit Concept</text>
+<text x="56" y="112" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">Multi-Wall Explorer</text>
+<rect x="56" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="76" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Selected symbol</text>
+<text x="76" y="222" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">BANKNIFTY</text>
+<rect x="334" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="354" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Current LTP</text>
+<text x="354" y="222" fill="#57b6ff" font-size="34" font-weight="700" font-family="Arial">53,460.45</text>
+<rect x="612" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="632" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Nearest wall</text>
+<text x="632" y="222" fill="#ff6b6b" font-size="34" font-weight="700" font-family="Arial">CALL 53,500</text>
+<rect x="890" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="910" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Cluster spread</text>
+<text x="910" y="222" fill="#f8b84e" font-size="34" font-weight="700" font-family="Arial">0.78%</text>
+<rect x="1168" y="150" rx="20" width="260" height="104" fill="#143149" stroke="#234a68"/>
+<text x="1188" y="180" fill="#88a3bb" font-size="16" font-family="Arial">Expiry</text>
+<text x="1188" y="222" fill="#2ed3b7" font-size="34" font-weight="700" font-family="Arial">2026-04-30</text>
+<rect x="56" y="290" rx="26" width="746" height="550" fill="#10263a" stroke="#234a68"/>
+<text x="78" y="324" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Wall Ladder</text><rect x="84" y="340" rx="18" width="690" height="380" fill="#143149" stroke="#234a68"/><text x="102" y="374" fill="#88a3bb" font-size="15" font-family="Arial">symbol</text><text x="188.25" y="374" fill="#88a3bb" font-size="15" font-family="Arial">ltp</text><text x="274.5" y="374" fill="#88a3bb" font-size="15" font-family="Arial">wall_side</text><text x="360.75" y="374" fill="#88a3bb" font-size="15" font-family="Arial">rank</text><text x="447" y="374" fill="#88a3bb" font-size="15" font-family="Arial">strike</text><text x="533.25" y="374" fill="#88a3bb" font-size="15" font-family="Arial">oi</text><text x="619.5" y="374" fill="#88a3bb" font-size="15" font-family="Arial">dist_pct</text><text x="705.75" y="374" fill="#88a3bb" font-size="15" font-family="Arial">selected</text><line x1="100" y1="418" x2="758" y2="418" stroke="#234a68"/><text x="102" y="436" fill="#e8f1f8" font-size="16" font-family="Arial">BANKNIFTY</text><text x="188.25" y="436" fill="#e8f1f8" font-size="16" font-family="Arial">53460.45</text><text x="274.5" y="436" fill="#ff6b6b" font-size="16" font-family="Arial">CALL</text><text x="360.75" y="436" fill="#e8f1f8" font-size="16" font-family="Arial">1</text><text x="447" y="436" fill="#e8f1f8" font-size="16" font-family="Arial">53500</text><text x="533.25" y="436" fill="#e8f1f8" font-size="16" font-family="Arial">9.8 L</text><text x="619.5" y="436" fill="#e8f1f8" font-size="16" font-family="Arial">0.07</text><text x="705.75" y="436" fill="#e8f1f8" font-size="16" font-family="Arial">yes</text><line x1="100" y1="490" x2="758" y2="490" stroke="#234a68"/><text x="102" y="508" fill="#e8f1f8" font-size="16" font-family="Arial">BANKNIFTY</text><text x="188.25" y="508" fill="#e8f1f8" font-size="16" font-family="Arial">53460.45</text><text x="274.5" y="508" fill="#24c48e" font-size="16" font-family="Arial">PUT</text><text x="360.75" y="508" fill="#e8f1f8" font-size="16" font-family="Arial">1</text><text x="447" y="508" fill="#e8f1f8" font-size="16" font-family="Arial">53300</text><text x="533.25" y="508" fill="#e8f1f8" font-size="16" font-family="Arial">8.9 L</text><text x="619.5" y="508" fill="#e8f1f8" font-size="16" font-family="Arial">0.30</text><text x="705.75" y="508" fill="#e8f1f8" font-size="16" font-family="Arial">no</text><line x1="100" y1="562" x2="758" y2="562" stroke="#234a68"/><text x="102" y="580" fill="#e8f1f8" font-size="16" font-family="Arial">BANKNIFTY</text><text x="188.25" y="580" fill="#e8f1f8" font-size="16" font-family="Arial">53460.45</text><text x="274.5" y="580" fill="#ff6b6b" font-size="16" font-family="Arial">CALL</text><text x="360.75" y="580" fill="#e8f1f8" font-size="16" font-family="Arial">2</text><text x="447" y="580" fill="#e8f1f8" font-size="16" font-family="Arial">53600</text><text x="533.25" y="580" fill="#e8f1f8" font-size="16" font-family="Arial">7.1 L</text><text x="619.5" y="580" fill="#e8f1f8" font-size="16" font-family="Arial">0.26</text><text x="705.75" y="580" fill="#e8f1f8" font-size="16" font-family="Arial">no</text><line x1="100" y1="634" x2="758" y2="634" stroke="#234a68"/><text x="102" y="652" fill="#e8f1f8" font-size="16" font-family="Arial">BANKNIFTY</text><text x="188.25" y="652" fill="#e8f1f8" font-size="16" font-family="Arial">53460.45</text><text x="274.5" y="652" fill="#24c48e" font-size="16" font-family="Arial">PUT</text><text x="360.75" y="652" fill="#e8f1f8" font-size="16" font-family="Arial">2</text><text x="447" y="652" fill="#e8f1f8" font-size="16" font-family="Arial">53200</text><text x="533.25" y="652" fill="#e8f1f8" font-size="16" font-family="Arial">6.8 L</text><text x="619.5" y="652" fill="#e8f1f8" font-size="16" font-family="Arial">0.49</text><text x="705.75" y="652" fill="#e8f1f8" font-size="16" font-family="Arial">no</text>
+<rect x="832" y="290" rx="26" width="712" height="550" fill="#10263a" stroke="#234a68"/>
+<text x="854" y="324" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Visual Context</text><rect x="860" y="342" rx="18" width="656" height="192" fill="#143149" stroke="#234a68"/>
+<line x1="900" y1="438" x2="1476" y2="438" stroke="#234a68" stroke-width="2"/>
+<rect x="1110" y="386" width="22" height="104" rx="10" fill="#ff6b6b"/>
+<rect x="1022" y="402" width="22" height="88" rx="10" fill="#f8b84e"/>
+<rect x="938" y="420" width="22" height="70" rx="10" fill="#24c48e"/>
+<line x1="1160" y1="360" x2="1160" y2="500" stroke="#57b6ff" stroke-dasharray="8 8"/>
+<text x="1130" y="352" fill="#57b6ff" font-size="15" font-family="Arial">LTP</text>
+</svg>

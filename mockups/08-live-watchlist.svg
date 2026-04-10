@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+<stop stop-color="#08131f"/><stop offset="1" stop-color="#11293c"/>
+</linearGradient>
+<linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#113052"/><stop offset="1" stop-color="#0D6C73"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1270" cy="110" r="220" fill="#0d6c73" opacity="0.08"/>
+<circle cx="140" cy="760" r="240" fill="#1f63a3" opacity="0.08"/>
+<text x="56" y="64" fill="#ffffff" font-size="18" font-family="Arial">Nubra x Streamlit Concept</text>
+<text x="56" y="112" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">Live Watchlist and Alerts</text>
+<rect x="56" y="150" rx="26" width="540" height="690" fill="#10263a" stroke="#234a68"/>
+<text x="78" y="184" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Watchlist Setup</text><rect x="80" y="250" rx="16" width="490" height="58" fill="#143149" stroke="#234a68"/>
+<text x="100" y="287" fill="#e8f1f8" font-size="18" font-family="Arial">Symbols: NIFTY, RELIANCE, HDFCBANK, INFY, TCS</text>
+<rect x="80" y="334" rx="16" width="230" height="48" fill="#2ed3b7"/>
+<text x="124" y="364" fill="#082132" font-size="18" font-weight="700" font-family="Arial">Save Watchlist</text>
+<rect x="80" y="430" rx="20" width="490" height="370" fill="#143149" stroke="#234a68"/>
+<text x="106" y="518" fill="#e8f1f8" font-size="20" font-family="Arial">• Wall proximity &lt; 0.50%</text>
+<text x="106" y="560" fill="#e8f1f8" font-size="20" font-family="Arial">• volume_ratio &gt; 2.00</text>
+<text x="106" y="602" fill="#e8f1f8" font-size="20" font-family="Arial">• Bullish + breakout alignment</text>
+<rect x="628" y="150" rx="26" width="916" height="690" fill="#10263a" stroke="#234a68"/>
+<text x="650" y="184" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Alert Feed</text><rect x="652" y="206" rx="18" width="868" height="464" fill="#143149" stroke="#234a68"/><text x="670" y="240" fill="#88a3bb" font-size="15" font-family="Arial">Time</text><text x="887" y="240" fill="#88a3bb" font-size="15" font-family="Arial">Symbol</text><text x="1104" y="240" fill="#88a3bb" font-size="15" font-family="Arial">Alert</text><text x="1321" y="240" fill="#88a3bb" font-size="15" font-family="Arial">Priority</text><line x1="668" y1="286" x2="1504" y2="286" stroke="#234a68"/><text x="670" y="304" fill="#e8f1f8" font-size="16" font-family="Arial">09:31</text><text x="887" y="304" fill="#e8f1f8" font-size="16" font-family="Arial">NIFTY</text><text x="1104" y="304" fill="#e8f1f8" font-size="16" font-family="Arial">Put wall within 0.33%</text><text x="1321" y="304" fill="#24c48e" font-size="16" font-family="Arial">High</text><line x1="668" y1="360" x2="1504" y2="360" stroke="#234a68"/><text x="670" y="378" fill="#e8f1f8" font-size="16" font-family="Arial">09:33</text><text x="887" y="378" fill="#e8f1f8" font-size="16" font-family="Arial">RELIANCE</text><text x="1104" y="378" fill="#e8f1f8" font-size="16" font-family="Arial">Volume ratio crossed 2.5x</text><text x="1321" y="378" fill="#2ed3b7" font-size="16" font-family="Arial">High</text><line x1="668" y1="434" x2="1504" y2="434" stroke="#234a68"/><text x="670" y="452" fill="#e8f1f8" font-size="16" font-family="Arial">09:35</text><text x="887" y="452" fill="#e8f1f8" font-size="16" font-family="Arial">BANKNIFTY</text><text x="1104" y="452" fill="#e8f1f8" font-size="16" font-family="Arial">Call wall tightening</text><text x="1321" y="452" fill="#f8b84e" font-size="16" font-family="Arial">Medium</text><line x1="668" y1="508" x2="1504" y2="508" stroke="#234a68"/><text x="670" y="526" fill="#e8f1f8" font-size="16" font-family="Arial">09:38</text><text x="887" y="526" fill="#e8f1f8" font-size="16" font-family="Arial">HDFCBANK</text><text x="1104" y="526" fill="#e8f1f8" font-size="16" font-family="Arial">Support cluster</text><text x="1321" y="526" fill="#57b6ff" font-size="16" font-family="Arial">Watch</text><line x1="668" y1="582" x2="1504" y2="582" stroke="#234a68"/><text x="670" y="600" fill="#e8f1f8" font-size="16" font-family="Arial">09:41</text><text x="887" y="600" fill="#e8f1f8" font-size="16" font-family="Arial">INFY</text><text x="1104" y="600" fill="#e8f1f8" font-size="16" font-family="Arial">Signal faded</text><text x="1321" y="600" fill="#88a3bb" font-size="16" font-family="Arial">Low</text>
+</svg>

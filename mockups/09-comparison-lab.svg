@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+<stop stop-color="#08131f"/><stop offset="1" stop-color="#11293c"/>
+</linearGradient>
+<linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#113052"/><stop offset="1" stop-color="#0D6C73"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1270" cy="110" r="220" fill="#0d6c73" opacity="0.08"/>
+<circle cx="140" cy="760" r="240" fill="#1f63a3" opacity="0.08"/>
+<text x="56" y="64" fill="#ffffff" font-size="18" font-family="Arial">Nubra x Streamlit Concept</text>
+<text x="56" y="112" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">Comparison Lab</text>
+<rect x="56" y="150" rx="26" width="1488" height="690" fill="#10263a" stroke="#234a68"/>
+<text x="78" y="184" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Cross-Symbol Comparison</text><text x="80" y="204" fill="#e8f1f8" font-size="22" font-family="Arial">Compare wall distance, breakout ratio, and signal quality across a basket.</text>
+<rect x="84" y="242" rx="20" width="220" height="96" fill="#143149" stroke="#234a68"/>
+<text x="104" y="272" fill="#88a3bb" font-size="16" font-family="Arial">Symbols</text>
+<text x="104" y="314" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">6</text>
+<rect x="324" y="242" rx="20" width="220" height="96" fill="#143149" stroke="#234a68"/>
+<text x="344" y="272" fill="#88a3bb" font-size="16" font-family="Arial">Bullish</text>
+<text x="344" y="314" fill="#24c48e" font-size="34" font-weight="700" font-family="Arial">4</text>
+<rect x="564" y="242" rx="20" width="220" height="96" fill="#143149" stroke="#234a68"/>
+<text x="584" y="272" fill="#88a3bb" font-size="16" font-family="Arial">Bearish</text>
+<text x="584" y="314" fill="#ff6b6b" font-size="34" font-weight="700" font-family="Arial">2</text>
+<rect x="804" y="242" rx="20" width="220" height="96" fill="#143149" stroke="#234a68"/>
+<text x="824" y="272" fill="#88a3bb" font-size="16" font-family="Arial">Avg ratio</text>
+<text x="824" y="314" fill="#2ed3b7" font-size="34" font-weight="700" font-family="Arial">2.14x</text>
+<rect x="1044" y="242" rx="20" width="220" height="96" fill="#143149" stroke="#234a68"/>
+<text x="1064" y="272" fill="#88a3bb" font-size="16" font-family="Arial">Closest wall</text>
+<text x="1064" y="314" fill="#f8b84e" font-size="34" font-weight="700" font-family="Arial">BANKNIFTY</text>
+<rect x="1284" y="242" rx="20" width="220" height="96" fill="#143149" stroke="#234a68"/>
+<text x="1304" y="272" fill="#88a3bb" font-size="16" font-family="Arial">Best combo</text>
+<text x="1304" y="314" fill="#57b6ff" font-size="34" font-weight="700" font-family="Arial">RELIANCE</text>
+<rect x="84" y="374" rx="18" width="680" height="404" fill="#143149" stroke="#234a68"/>
+<rect x="796" y="374" rx="18" width="720" height="404" fill="#143149" stroke="#234a68"/>
+<rect x="118" y="512" width="98.33333333333333" height="156" rx="8" fill="#24c48e"/><rect x="222.33333333333331" y="544" width="98.33333333333333" height="124" rx="8" fill="#ff6b6b"/><rect x="326.66666666666663" y="560" width="98.33333333333333" height="108" rx="8" fill="#2ed3b7"/><rect x="431" y="574" width="98.33333333333333" height="94" rx="8" fill="#f8b84e"/><rect x="535.3333333333333" y="592" width="98.33333333333333" height="76" rx="8" fill="#24c48e"/><rect x="639.6666666666666" y="610" width="98.33333333333333" height="57.99999999999999" rx="8" fill="#ff6b6b"/>
+<polyline points="830,598 885.4545454545455,575.1428571428571 940.9090909090909,558 996.3636363636364,563.7142857142857 1051.8181818181818,535.1428571428571 1107.2727272727273,523.7142857142857 1162.7272727272727,500.8571428571429 1218.1818181818182,489.42857142857144 1273.6363636363635,466.57142857142856 1329.090909090909,472.2857142857143 1384.5454545454545,438 1440,449.42857142857144" fill="none" stroke="#57b6ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1440" cy="449.42857142857144" r="5" fill="#57b6ff"/>
+</svg>

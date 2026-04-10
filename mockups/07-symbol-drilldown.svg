@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+<stop stop-color="#08131f"/><stop offset="1" stop-color="#11293c"/>
+</linearGradient>
+<linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#113052"/><stop offset="1" stop-color="#0D6C73"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1270" cy="110" r="220" fill="#0d6c73" opacity="0.08"/>
+<circle cx="140" cy="760" r="240" fill="#1f63a3" opacity="0.08"/>
+<text x="56" y="64" fill="#ffffff" font-size="18" font-family="Arial">Nubra x Streamlit Concept</text>
+<text x="56" y="112" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">Symbol Drilldown</text>
+<rect x="56" y="150" rx="26" width="1488" height="110" fill="url(#hero)"/>
+<text x="88" y="214" fill="#ffffff" font-size="38" font-weight="700" font-family="Arial">RELIANCE</text>
+<text x="320" y="214" fill="#e8f1f8" font-size="24" font-family="Arial">Bullish wall bias with 2.56x volume and price near breakout zone</text>
+<rect x="56" y="292" rx="26" width="930" height="548" fill="#10263a" stroke="#234a68"/>
+<text x="78" y="326" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Price + Signal Overlay</text><rect x="84" y="338" rx="18" width="874" height="450" fill="#143149" stroke="#234a68"/>
+<polyline points="110,648 170,628 230,638 290,618 350,598 410,608 470,578 530,548 590,518 650,488 710,508 770,458 830,428 890,408" fill="none" stroke="#57b6ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="890" cy="408" r="5" fill="#57b6ff"/>
+<rect x="126" y="742.5" width="68" height="17.5" rx="8" fill="#2ed3b7"/><rect x="200" y="735.5" width="68" height="24.5" rx="8" fill="#2ed3b7"/><rect x="274" y="737.6" width="68" height="22.400000000000002" rx="8" fill="#2ed3b7"/><rect x="348" y="729.2" width="68" height="30.8" rx="8" fill="#2ed3b7"/><rect x="422" y="717.3" width="68" height="42.699999999999996" rx="8" fill="#2ed3b7"/><rect x="496" y="726.4" width="68" height="33.6" rx="8" fill="#2ed3b7"/><rect x="570" y="713.1" width="68" height="46.900000000000006" rx="8" fill="#2ed3b7"/><rect x="644" y="708.2" width="68" height="51.8" rx="8" fill="#2ed3b7"/><rect x="718" y="711.7" width="68" height="48.3" rx="8" fill="#2ed3b7"/><rect x="792" y="702.6" width="68" height="57.4" rx="8" fill="#2ed3b7"/>
+<rect x="1018" y="292" rx="26" width="526" height="548" fill="#10263a" stroke="#234a68"/>
+<text x="1040" y="326" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Story Card</text><text x="1042" y="350" fill="#e8f1f8" font-size="20" font-family="Arial">• Supportive wall below spot</text>
+<text x="1042" y="398" fill="#e8f1f8" font-size="20" font-family="Arial">• Stronger-than-normal participation</text>
+<text x="1042" y="446" fill="#e8f1f8" font-size="20" font-family="Arial">• Clear user narrative in plain English</text>
+<text x="1042" y="520" fill="#2ed3b7" font-size="24" font-weight="700" font-family="Arial">Best demo screen for stakeholders.</text>
+</svg>

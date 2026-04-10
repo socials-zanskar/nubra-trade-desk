@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+<stop stop-color="#08131f"/><stop offset="1" stop-color="#11293c"/>
+</linearGradient>
+<linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#113052"/><stop offset="1" stop-color="#0D6C73"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1270" cy="110" r="220" fill="#0d6c73" opacity="0.08"/>
+<circle cx="140" cy="760" r="240" fill="#1f63a3" opacity="0.08"/>
+<text x="56" y="64" fill="#ffffff" font-size="18" font-family="Arial">Nubra x Streamlit Concept</text>
+<text x="56" y="112" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">Volume Spike Tracker</text>
+<rect x="56" y="150" rx="26" width="420" height="690" fill="#10263a" stroke="#234a68"/>
+<text x="78" y="184" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Tracker Controls</text><rect x="80" y="206" rx="16" width="372" height="60" fill="#143149" stroke="#234a68"/>
+<text x="100" y="244" fill="#e8f1f8" font-size="18" font-family="Arial">Watchlist: NIFTY50 Momentum</text>
+<rect x="80" y="286" rx="16" width="176" height="54" fill="#143149" stroke="#234a68"/>
+<text x="100" y="320" fill="#e8f1f8" font-size="18" font-family="Arial">Lookback: 10</text>
+<rect x="276" y="286" rx="16" width="176" height="54" fill="#143149" stroke="#234a68"/>
+<text x="296" y="320" fill="#e8f1f8" font-size="18" font-family="Arial">Interval: 5m</text>
+<rect x="80" y="360" rx="16" width="190" height="48" fill="#2ed3b7"/>
+<text x="116" y="390" fill="#082132" font-size="18" font-weight="700" font-family="Arial">Run Tracker</text>
+<text x="82" y="470" fill="#88a3bb" font-size="18" font-family="Arial">What makes it useful</text>
+<text x="82" y="510" fill="#e8f1f8" font-size="19" font-family="Arial">• Highest abnormal volume</text>
+<text x="82" y="544" fill="#e8f1f8" font-size="19" font-family="Arial">• Same-slot comparison</text>
+<text x="82" y="578" fill="#e8f1f8" font-size="19" font-family="Arial">• Watchlist-first workflow</text>
+<text x="82" y="612" fill="#e8f1f8" font-size="19" font-family="Arial">• Easy user alerts</text>
+<rect x="504" y="150" rx="26" width="1040" height="690" fill="#10263a" stroke="#234a68"/>
+<text x="526" y="184" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Ranked Live Spikes</text><rect x="530" y="206" rx="18" width="988" height="380" fill="#143149" stroke="#234a68"/><text x="548" y="240" fill="#88a3bb" font-size="15" font-family="Arial">symbol</text><text x="745.6" y="240" fill="#88a3bb" font-size="15" font-family="Arial">candle_time</text><text x="943.2" y="240" fill="#88a3bb" font-size="15" font-family="Arial">current_volume</text><text x="1140.8" y="240" fill="#88a3bb" font-size="15" font-family="Arial">average_volume</text><text x="1338.4" y="240" fill="#88a3bb" font-size="15" font-family="Arial">volume_ratio</text><line x1="546" y1="284" x2="1502" y2="284" stroke="#234a68"/><text x="548" y="302" fill="#e8f1f8" font-size="16" font-family="Arial">ADANIENT</text><text x="745.6" y="302" fill="#e8f1f8" font-size="16" font-family="Arial">2026-04-09 09:30 IST</text><text x="943.2" y="302" fill="#e8f1f8" font-size="16" font-family="Arial">4,230,000</text><text x="1140.8" y="302" fill="#e8f1f8" font-size="16" font-family="Arial">1,040,000</text><text x="1338.4" y="302" fill="#2ed3b7" font-size="16" font-family="Arial">4.06</text><line x1="546" y1="356" x2="1502" y2="356" stroke="#234a68"/><text x="548" y="374" fill="#e8f1f8" font-size="16" font-family="Arial">ABB</text><text x="745.6" y="374" fill="#e8f1f8" font-size="16" font-family="Arial">2026-04-09 09:30 IST</text><text x="943.2" y="374" fill="#e8f1f8" font-size="16" font-family="Arial">2,870,000</text><text x="1140.8" y="374" fill="#e8f1f8" font-size="16" font-family="Arial">920,000</text><text x="1338.4" y="374" fill="#24c48e" font-size="16" font-family="Arial">3.12</text><line x1="546" y1="428" x2="1502" y2="428" stroke="#234a68"/><text x="548" y="446" fill="#e8f1f8" font-size="16" font-family="Arial">RELIANCE</text><text x="745.6" y="446" fill="#e8f1f8" font-size="16" font-family="Arial">2026-04-09 09:30 IST</text><text x="943.2" y="446" fill="#e8f1f8" font-size="16" font-family="Arial">8,540,000</text><text x="1140.8" y="446" fill="#e8f1f8" font-size="16" font-family="Arial">3,330,000</text><text x="1338.4" y="446" fill="#f8b84e" font-size="16" font-family="Arial">2.56</text><line x1="546" y1="500" x2="1502" y2="500" stroke="#234a68"/><text x="548" y="518" fill="#e8f1f8" font-size="16" font-family="Arial">TCS</text><text x="745.6" y="518" fill="#e8f1f8" font-size="16" font-family="Arial">2026-04-09 09:30 IST</text><text x="943.2" y="518" fill="#e8f1f8" font-size="16" font-family="Arial">1,210,000</text><text x="1140.8" y="518" fill="#e8f1f8" font-size="16" font-family="Arial">540,000</text><text x="1338.4" y="518" fill="#57b6ff" font-size="16" font-family="Arial">2.24</text><text x="530" y="612" fill="#88a3bb" font-size="16" font-family="Arial">Promote only meaningful spikes, not absolute volume leaders alone.</text><rect x="540" y="658.4" width="100" height="111.60000000000001" rx="8" fill="#2ed3b7"/><rect x="646" y="683.6" width="100" height="86.39999999999999" rx="8" fill="#57b6ff"/><rect x="752" y="700.4" width="100" height="69.6" rx="8" fill="#f8b84e"/><rect x="858" y="708.8" width="100" height="61.2" rx="8" fill="#24c48e"/><rect x="964" y="714.8" width="100" height="55.2" rx="8" fill="#2ed3b7"/><rect x="1070" y="719.6" width="100" height="50.4" rx="8" fill="#57b6ff"/><rect x="1176" y="724.4" width="100" height="45.6" rx="8" fill="#f8b84e"/>
+</svg>

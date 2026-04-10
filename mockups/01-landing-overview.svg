@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+<stop stop-color="#08131f"/><stop offset="1" stop-color="#11293c"/>
+</linearGradient>
+<linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#113052"/><stop offset="1" stop-color="#0D6C73"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1270" cy="110" r="220" fill="#0d6c73" opacity="0.08"/>
+<circle cx="140" cy="760" r="240" fill="#1f63a3" opacity="0.08"/>
+<text x="56" y="64" fill="#ffffff" font-size="18" font-family="Arial">Nubra x Streamlit Concept</text>
+<text x="56" y="112" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">Signal Discovery Dashboard</text>
+<rect x="56" y="150" rx="28" width="1488" height="210" fill="url(#hero)" opacity="0.96"/>
+<text x="90" y="220" fill="#ffffff" font-size="48" font-weight="700" font-family="Arial">Find meaningful market signals, not just raw market data.</text>
+<text x="90" y="268" fill="#e8f1f8" font-size="24" font-family="Arial">Volume spikes, breakout confirmation, OI walls, live watchlists, and symbol drilldowns powered by Nubra.</text>
+<rect x="92" y="302" rx="14" width="220" height="44" fill="#2ed3b7"/>
+<text x="125" y="331" fill="#082132" font-size="18" font-weight="700" font-family="Arial">Open Signal Dashboard</text>
+<rect x="56" y="394" rx="20" width="280" height="120" fill="#143149" stroke="#234a68"/>
+<text x="76" y="424" fill="#88a3bb" font-size="16" font-family="Arial">Core engine</text>
+<text x="76" y="466" fill="#2ed3b7" font-size="34" font-weight="700" font-family="Arial">Volume spikes</text>
+<rect x="354" y="394" rx="20" width="280" height="120" fill="#143149" stroke="#234a68"/>
+<text x="374" y="424" fill="#88a3bb" font-size="16" font-family="Arial">Context engine</text>
+<text x="374" y="466" fill="#57b6ff" font-size="34" font-weight="700" font-family="Arial">OI walls</text>
+<rect x="652" y="394" rx="20" width="280" height="120" fill="#143149" stroke="#234a68"/>
+<text x="672" y="424" fill="#88a3bb" font-size="16" font-family="Arial">Hosting</text>
+<text x="672" y="466" fill="#f8b84e" font-size="34" font-weight="700" font-family="Arial">Streamlit</text>
+<rect x="950" y="394" rx="20" width="280" height="120" fill="#143149" stroke="#234a68"/>
+<text x="970" y="424" fill="#88a3bb" font-size="16" font-family="Arial">Mode</text>
+<text x="970" y="466" fill="#24c48e" font-size="34" font-weight="700" font-family="Arial">Demo / BYOC</text>
+<rect x="56" y="548" rx="26" width="720" height="290" fill="#10263a" stroke="#234a68"/>
+<text x="78" y="582" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">User Value</text><rect x="78" y="588" rx="18" width="676" height="260" fill="#143149" stroke="#234a68"/><text x="96" y="622" fill="#88a3bb" font-size="15" font-family="Arial">Module</text><text x="321.33333333333337" y="622" fill="#88a3bb" font-size="15" font-family="Arial">Useful output</text><text x="546.6666666666667" y="622" fill="#88a3bb" font-size="15" font-family="Arial">Why users care</text><line x1="94" y1="642" x2="738" y2="642" stroke="#234a68"/><text x="96" y="660" fill="#e8f1f8" font-size="16" font-family="Arial">Volume Tracker</text><text x="321.33333333333337" y="660" fill="#e8f1f8" font-size="16" font-family="Arial">Abnormal volume now</text><text x="546.6666666666667" y="660" fill="#e8f1f8" font-size="16" font-family="Arial">Discover movers early</text><line x1="94" y1="690" x2="738" y2="690" stroke="#234a68"/><text x="96" y="708" fill="#e8f1f8" font-size="16" font-family="Arial">Breakout Filter</text><text x="321.33333333333337" y="708" fill="#e8f1f8" font-size="16" font-family="Arial">Volume + price combo</text><text x="546.6666666666667" y="708" fill="#e8f1f8" font-size="16" font-family="Arial">Remove weak noise</text><line x1="94" y1="738" x2="738" y2="738" stroke="#234a68"/><text x="96" y="756" fill="#e8f1f8" font-size="16" font-family="Arial">OI Context</text><text x="321.33333333333337" y="756" fill="#e8f1f8" font-size="16" font-family="Arial">Support / resistance</text><text x="546.6666666666667" y="756" fill="#e8f1f8" font-size="16" font-family="Arial">Know what blocks the move</text><line x1="94" y1="786" x2="738" y2="786" stroke="#234a68"/><text x="96" y="804" fill="#e8f1f8" font-size="16" font-family="Arial">Watchlist</text><text x="321.33333333333337" y="804" fill="#e8f1f8" font-size="16" font-family="Arial">Live alerts</text><text x="546.6666666666667" y="804" fill="#e8f1f8" font-size="16" font-family="Arial">Track your names fast</text>
+<rect x="808" y="548" rx="26" width="736" height="290" fill="#10263a" stroke="#234a68"/>
+<text x="830" y="582" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Recommended V1</text><text x="832" y="606" fill="#e8f1f8" font-size="20" font-family="Arial">• Shared demo mode using Streamlit secrets</text>
+<text x="832" y="648" fill="#e8f1f8" font-size="20" font-family="Arial">• Optional bring-your-own Nubra credentials later</text>
+<text x="832" y="690" fill="#e8f1f8" font-size="20" font-family="Arial">• Read-only product with live-ish scans and drilldowns</text>
+<text x="832" y="742" fill="#2ed3b7" font-size="26" font-weight="700" font-family="Arial">Build a useful signal product, not a vanity dashboard.</text>
+</svg>

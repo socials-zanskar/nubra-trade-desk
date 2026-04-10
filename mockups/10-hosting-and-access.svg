@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1600" height="900" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+<stop stop-color="#08131f"/><stop offset="1" stop-color="#11293c"/>
+</linearGradient>
+<linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+<stop stop-color="#113052"/><stop offset="1" stop-color="#0D6C73"/>
+</linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<circle cx="1270" cy="110" r="220" fill="#0d6c73" opacity="0.08"/>
+<circle cx="140" cy="760" r="240" fill="#1f63a3" opacity="0.08"/>
+<text x="56" y="64" fill="#ffffff" font-size="18" font-family="Arial">Nubra x Streamlit Concept</text>
+<text x="56" y="112" fill="#e8f1f8" font-size="34" font-weight="700" font-family="Arial">Hosting and Access Strategy</text>
+<rect x="56" y="150" rx="26" width="472" height="690" fill="#10263a" stroke="#234a68"/>
+<text x="78" y="184" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Option A: Demo Mode</text><text x="80" y="210" fill="#e8f1f8" font-size="20" font-family="Arial">Shared read-only showcase using Streamlit secrets.</text>
+<text x="80" y="262" fill="#e8f1f8" font-size="19" font-family="Arial">1. App owner stores Nubra credentials</text>
+<text x="80" y="304" fill="#e8f1f8" font-size="19" font-family="Arial">2. Visitors use the app immediately</text>
+<text x="80" y="346" fill="#e8f1f8" font-size="19" font-family="Arial">3. Fastest path to launch</text>
+<text x="80" y="430" fill="#2ed3b7" font-size="28" font-weight="700" font-family="Arial">Recommended phase 1</text>
+<rect x="564" y="150" rx="26" width="472" height="690" fill="#10263a" stroke="#234a68"/>
+<text x="586" y="184" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Option B: Bring Your Own Nubra Session</text><text x="588" y="210" fill="#e8f1f8" font-size="20" font-family="Arial">User enters credentials for that session only.</text>
+<text x="588" y="262" fill="#e8f1f8" font-size="19" font-family="Arial">1. Better user isolation</text>
+<text x="588" y="304" fill="#e8f1f8" font-size="19" font-family="Arial">2. More UX friction</text>
+<text x="588" y="346" fill="#e8f1f8" font-size="19" font-family="Arial">3. Good second-phase feature</text>
+<rect x="1072" y="150" rx="26" width="472" height="690" fill="#10263a" stroke="#234a68"/>
+<text x="1094" y="184" fill="#e8f1f8" font-size="22" font-weight="700" font-family="Arial">Option C: App Login</text><text x="1096" y="210" fill="#e8f1f8" font-size="20" font-family="Arial">Use Streamlit OIDC only to gate access.</text>
+<text x="1096" y="262" fill="#e8f1f8" font-size="19" font-family="Arial">1. Great for internal or partner users</text>
+<text x="1096" y="304" fill="#e8f1f8" font-size="19" font-family="Arial">2. Nubra auth still separate</text>
+<text x="1096" y="346" fill="#e8f1f8" font-size="19" font-family="Arial">3. Good if you want a private portal</text>
+</svg>
