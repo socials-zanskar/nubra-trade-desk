@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import os
 import sys
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -51,6 +52,7 @@ def main() -> int:
     load_local_env()
     configure_logging()
     started_at = datetime.now(UTC)
+    _validate_auth_environment()
     config = load_app_config()
     config = replace(
         config,
@@ -112,6 +114,33 @@ def main() -> int:
         stats.stock_eod_upserted,
     )
     return 0
+
+
+def _validate_auth_environment() -> None:
+    phone_present = bool((os.getenv("PHONE_NO", "") or "").strip())
+    mpin_present = bool((os.getenv("MPIN", "") or "").strip())
+    totp_secret = (os.getenv("NUBRA_TOTP_SECRET", "") or "").strip().replace(" ", "")
+    totp_present = bool(totp_secret)
+    github_actions = (os.getenv("GITHUB_ACTIONS", "") or "").lower() == "true"
+
+    logger.info(
+        "Auth env | github_actions=%s | phone=%s | mpin=%s | totp_secret=%s",
+        github_actions,
+        phone_present,
+        mpin_present,
+        totp_present,
+    )
+
+    if github_actions and not totp_present:
+        raise RuntimeError("NUBRA_TOTP_SECRET is missing in GitHub Actions secrets.")
+
+    if totp_present:
+        try:
+            import pyotp
+
+            pyotp.TOTP(totp_secret).now()
+        except Exception as exc:
+            raise RuntimeError("NUBRA_TOTP_SECRET is present but invalid for TOTP generation.") from exc
 
 
 def run_sync(*, connection, scanned_at, symbol_rows, snapshot, option_chains, config) -> SyncStats:
