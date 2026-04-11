@@ -6,6 +6,7 @@ import sys
 from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +28,7 @@ from nubra_dash.services.db import (
     store_signal_board,
     record_sync_run,
     store_index_ladders,
+    store_market_eod_summary,
     store_index_walls,
     store_volume_batches,
     upsert_symbols,
@@ -90,11 +92,13 @@ def main() -> int:
                 "index_multi_wall_rows": stats.index_multi_wall_latest_upserted,
                 "index_ladder_rows": stats.index_ladder_latest_upserted,
                 "drilldown_rows": stats.symbol_drilldown_latest_upserted,
+                "market_eod_rows": stats.market_eod_upserted,
+                "stock_eod_rows": stats.stock_eod_upserted,
             },
         )
 
     logger.info(
-        "Supabase sync complete | symbols=%s | volume_latest=%s | signal_board=%s | transitions=%s | alerts=%s | index_walls=%s | index_multi=%s | index_ladders=%s | drilldowns=%s",
+        "Supabase sync complete | symbols=%s | volume_latest=%s | signal_board=%s | transitions=%s | alerts=%s | index_walls=%s | index_multi=%s | index_ladders=%s | drilldowns=%s | market_eod=%s | stock_eod=%s",
         stats.symbols_upserted,
         stats.volume_latest_upserted,
         stats.signal_board_latest_upserted,
@@ -104,6 +108,8 @@ def main() -> int:
         stats.index_multi_wall_latest_upserted,
         stats.index_ladder_latest_upserted,
         stats.symbol_drilldown_latest_upserted,
+        stats.market_eod_upserted,
+        stats.stock_eod_upserted,
     )
     return 0
 
@@ -144,6 +150,16 @@ def run_sync(*, connection, scanned_at, symbol_rows, snapshot, option_chains, co
         scanned_at=scanned_at,
         snapshots=option_chains,
     )
+    market_eod_upserted = 0
+    stock_eod_upserted = 0
+    if _should_store_eod_summary(scanned_at):
+        market_eod_upserted, stock_eod_upserted = store_market_eod_summary(
+            connection,
+            scanned_at=scanned_at,
+            symbol_source=config.scheduler.symbol_source,
+            signals=snapshot["merged_signals"],
+            index_walls=snapshot["index_wall_batch"].rows,
+        )
     return SyncStats(
         symbols_upserted=symbol_count,
         volume_latest_upserted=volume_latest,
@@ -160,6 +176,8 @@ def run_sync(*, connection, scanned_at, symbol_rows, snapshot, option_chains, co
         index_ladder_history_inserted=ladder_history,
         symbol_drilldown_latest_upserted=drilldown_latest,
         symbol_drilldown_history_inserted=drilldown_history,
+        market_eod_upserted=market_eod_upserted,
+        stock_eod_upserted=stock_eod_upserted,
     )
 
 
@@ -216,6 +234,12 @@ def _load_symbol_csv(path_value: str | None) -> tuple[tuple[str, ...], list[dict
             )
     symbols = tuple(row["symbol"] for row in rows)
     return symbols, rows
+
+def _should_store_eod_summary(scanned_at: datetime) -> bool:
+    market_time = scanned_at.astimezone(ZoneInfo("Asia/Kolkata"))
+    if market_time.weekday() >= 5:
+        return False
+    return (market_time.hour, market_time.minute) >= (15, 30)
 
 
 if __name__ == "__main__":

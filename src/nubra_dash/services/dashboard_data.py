@@ -6,6 +6,7 @@ from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Iterable
+from zoneinfo import ZoneInfo
 
 from ..config import AppConfig, INDEX_WALL_SYMBOLS
 from ..models import AuthSession, MergedSignal, ScanResultBatch, VolumeSignal, WallSignal
@@ -16,6 +17,7 @@ from .db import (
     load_latest_index_ladder_snapshots,
     load_latest_index_multi_wall_batch,
     load_latest_index_wall_batch,
+    load_latest_market_eod_summary,
     load_latest_signal_board,
     load_latest_symbol_drilldowns,
     load_latest_volume_batch,
@@ -52,6 +54,8 @@ def get_dashboard_snapshot(
         database_snapshot = _load_database_snapshot(app_config, chosen_symbols, live_auth=live_auth)
         if database_snapshot is not None:
             return database_snapshot
+        if not live_auth:
+            return _empty_database_snapshot(app_config, chosen_symbols)
 
     auth_session = load_auth_session(app_config.auth)
 
@@ -108,6 +112,8 @@ def get_dashboard_snapshot(
         "generated_at": datetime.now(),
         "is_demo": False,
         "data_source": "live",
+        "eod_summary": None,
+        "is_post_close": _is_post_close_now(),
     }
 
 
@@ -213,6 +219,7 @@ def _load_database_snapshot(
             alert_events = load_recent_alert_events(connection, symbols=chosen_symbols)
             watchlist_symbols = load_watchlist_symbols(connection)
             drilldown_summaries = load_latest_symbol_drilldowns(connection, chosen_symbols)
+            eod_summary = load_latest_market_eod_summary(connection)
     except Exception:
         return None
 
@@ -255,12 +262,51 @@ def _load_database_snapshot(
         "generated_at": generated_at,
         "is_demo": False,
         "data_source": "supabase",
+        "eod_summary": eod_summary,
+        "is_post_close": _is_post_close_now(),
     }
 
 
 def _database_is_configured(app_config: AppConfig) -> bool:
     db = app_config.database
     return bool(db.url or db.host)
+
+
+def _empty_database_snapshot(app_config: AppConfig, chosen_symbols: tuple[str, ...]) -> dict[str, object]:
+    auth_session = AuthSession(
+        mode="supabase",
+        environment=app_config.auth.resolved_environment(),
+        is_available=False,
+        error="No stored snapshot available yet.",
+    )
+    empty_batch = ScanResultBatch(source="supabase", errors=("No stored snapshot available yet.",))
+    return {
+        "auth_session": auth_session,
+        "volume_batch": empty_batch,
+        "wall_batch": empty_batch,
+        "multi_wall_batch": empty_batch,
+        "stock_wall_batch": ScanResultBatch(source="stock_oi_disabled"),
+        "stock_multi_wall_batch": ScanResultBatch(source="stock_oi_disabled"),
+        "index_wall_batch": empty_batch,
+        "index_multi_wall_batch": empty_batch,
+        "merged_signals": (),
+        "symbols": chosen_symbols,
+        "index_symbols": INDEX_WALL_SYMBOLS,
+        "index_ladders": (),
+        "alert_events": (),
+        "watchlist_symbols": (),
+        "drilldown_summaries": {},
+        "generated_at": None,
+        "is_demo": False,
+        "data_source": "pending",
+        "eod_summary": None,
+        "is_post_close": _is_post_close_now(),
+    }
+
+
+def _is_post_close_now() -> bool:
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    return now.weekday() < 5 and (now.hour, now.minute) >= (15, 30)
 
 
 def _symbol_seed_rows(symbols: tuple[str, ...], *, exchange: str) -> list[dict[str, object]]:

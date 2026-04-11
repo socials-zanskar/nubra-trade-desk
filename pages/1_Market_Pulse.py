@@ -11,11 +11,14 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from nubra_dash.bootstrap import load_local_env
 from nubra_dash.models import WallSignal
 from nubra_dash.ui.runtime import load_snapshot_with_feedback, render_refresh_bar
 from nubra_dash.ui.shell import get_runtime_app_config, get_selected_symbols, render_sidebar
 from nubra_dash.ui.theme import inject_css
 from nubra_dash.ui.widgets import callout, dataframe_card, metric_card, section_header
+
+load_local_env()
 
 
 def _open_drilldown(symbol: str) -> None:
@@ -60,6 +63,7 @@ snapshot, used_cache = load_snapshot_with_feedback(
 )
 
 merged = tuple(snapshot["merged_signals"])
+eod_summary = snapshot.get("eod_summary")
 top_signal = merged[0] if merged else None
 top_volume = max((signal.volume_ratio or 0.0 for signal in merged), default=0.0)
 index_rows = [row for row in snapshot["index_wall_batch"].rows if isinstance(row, WallSignal)]
@@ -68,6 +72,69 @@ errors = snapshot["volume_batch"].errors + snapshot["index_wall_batch"].errors
 actionable = [signal for signal in merged if (signal.volume_ratio or 0.0) >= 1.5]
 build = [signal for signal in merged if 1.1 <= (signal.volume_ratio or 0.0) < 1.5]
 cooling = [signal for signal in merged if (signal.volume_ratio or 0.0) < 1.1]
+
+if snapshot.get("is_post_close") and eod_summary:
+    summary = dict(eod_summary.get("summary") or {})
+    leaders = tuple(eod_summary.get("leaders") or ())
+    st.markdown(
+        """
+        <div class="nubra-desk-hero">
+          <div class="nubra-kicker">Today's market</div>
+          <h1 class="nubra-desk-title">Close pulse</h1>
+          <p class="nubra-desk-copy">
+            The market is closed. This board now prioritizes the best setups, the strongest participation, and the final index pressure that mattered into the close.
+          </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    cols = st.columns(4)
+    with cols[0]:
+        metric_card("Top symbol", str(summary.get("top_symbol") or "None"), "Strongest stored leader at the close.")
+    with cols[1]:
+        metric_card("Priority names", str(summary.get("priority_signals") or 0), "Signals that held front-board quality.", accent="#57b6ff")
+    with cols[2]:
+        metric_card("Top ratio", f"{float(summary.get('top_volume_ratio') or 0.0):.2f}x", "Best participation print captured today.", accent="#f8b84e")
+    with cols[3]:
+        metric_card("Index regime", str(summary.get("nifty_bias") or "Mixed"), "NIFTY close context anchors the board.", accent="#24c48e")
+
+    left, right = st.columns([1.15, 0.85], gap="large")
+    with left:
+        section_header("Today's strongest names", "Best candidates from the final stored summary.")
+        top_rows = list(leaders[:8])
+        if top_rows:
+            dataframe_card(
+                [
+                    {
+                        "rank": row.get("rank"),
+                        "symbol": row.get("symbol"),
+                        "state": row.get("action_state"),
+                        "grade": row.get("signal_grade"),
+                        "volume ratio": round(float(row.get("volume_ratio") or 0.0), 2),
+                        "reason": row.get("signal_reason"),
+                    }
+                    for row in top_rows
+                ]
+            )
+        else:
+            callout("No EOD leaders yet", "Run the post-close sync once to populate today's close board.")
+
+    with right:
+        section_header("Index close context", "Final options pressure that framed the session.")
+        callout(
+            "NIFTY",
+            f"{summary.get('nifty_bias') or 'No saved bias'} | {summary.get('nifty_wall_type') or 'N/A'} wall at {float(summary.get('nifty_wall_strike') or 0.0):.0f}",
+        )
+        callout(
+            "SENSEX",
+            f"{summary.get('sensex_bias') or 'No saved bias'} | {summary.get('sensex_wall_type') or 'N/A'} wall at {float(summary.get('sensex_wall_strike') or 0.0):.0f}",
+        )
+        if summary.get("top_signal_reason"):
+            callout("Desk takeaway", str(summary.get("top_signal_reason")))
+
+    if used_cache:
+        st.caption("Showing the latest stored close summary for faster response.")
+    st.stop()
 
 st.markdown(
     """

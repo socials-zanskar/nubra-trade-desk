@@ -3,7 +3,10 @@ name: Sync Supabase Snapshots
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "45,55 3 * * 1-5"
+    - cron: "*/10 4-9 * * 1-5"
+    - cron: "0 10 * * 1-5"
+    - cron: "5 10 * * 1-5"
 
 jobs:
   sync:
@@ -27,12 +30,18 @@ jobs:
           PHONE_NO: ${{ secrets.PHONE_NO }}
           MPIN: ${{ secrets.MPIN }}
           NUBRA_TOTP_SECRET: ${{ secrets.NUBRA_TOTP_SECRET }}
-          NUBRA_OTP: ${{ secrets.NUBRA_OTP }}
           NUBRA_OI_WALLS_ENV: PROD
           NUBRA_APP_ENV: production
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+          SUPABASE_DB_PORT: ${{ secrets.SUPABASE_DB_PORT }}
+          SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
+          SUPABASE_DB_USER: ${{ secrets.SUPABASE_DB_USER }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SCAN_BATCH_SIZE: ${{ secrets.SCAN_BATCH_SIZE }}
+          SCAN_REFRESH_MINUTES: ${{ secrets.SCAN_REFRESH_MINUTES }}
           SCAN_SYMBOL_SOURCE: ${{ secrets.SCAN_SYMBOL_SOURCE }}
           SCAN_SYMBOLS_CSV: ${{ secrets.SCAN_SYMBOLS_CSV }}
         run: python scripts/sync_supabase_snapshots.py

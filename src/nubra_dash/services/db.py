@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Any, Iterable
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -38,6 +39,8 @@ class SyncStats:
     symbol_drilldown_history_inserted: int = 0
     alert_events_inserted: int = 0
     signal_transitions_inserted: int = 0
+    market_eod_upserted: int = 0
+    stock_eod_upserted: int = 0
 
 
 def connect_db(config: DatabaseConfig):
@@ -1604,6 +1607,161 @@ def _build_drilldown_secondary_note(signal: MergedSignal) -> str:
             f"Trigger {signal.trigger_price:.2f}; invalidation {signal.invalidation_price:.2f}."
         )
     return " ".join(details) or "Stored summary is ready for a deeper live drilldown if needed."
+
+
+def store_market_eod_summary(
+    connection,
+    *,
+    scanned_at: datetime,
+    symbol_source: str,
+    signals: Iterable[MergedSignal],
+    index_walls: Iterable[WallSignal],
+) -> tuple[int, int]:
+    trading_day = _trading_day_for(scanned_at)
+    rows = list(signals)
+    wall_rows = [row for row in index_walls if isinstance(row, WallSignal)]
+    top_signal = rows[0] if rows else None
+    priority_count = sum(1 for signal in rows if signal.signal_grade in {"A", "B"})
+    wall_map = {row.symbol: row for row in wall_rows}
+    nifty = wall_map.get("NIFTY")
+    sensex = wall_map.get("SENSEX")
+
+    summary_payload = {
+        "trading_day": trading_day,
+        "scanned_at": _ensure_utc(scanned_at),
+        "symbol_source": symbol_source,
+        "total_signals": len(rows),
+        "priority_signals": priority_count,
+        "top_symbol": top_signal.symbol if top_signal else None,
+        "top_grade": top_signal.signal_grade if top_signal else None,
+        "top_volume_ratio": top_signal.volume_ratio if top_signal else None,
+        "top_signal_reason": top_signal.signal_reason if top_signal else None,
+        "nifty_bias": nifty.bias if nifty else None,
+        "nifty_wall_type": nifty.wall_type if nifty else None,
+        "nifty_wall_strike": nifty.wall_strike if nifty else None,
+        "sensex_bias": sensex.bias if sensex else None,
+        "sensex_wall_type": sensex.wall_type if sensex else None,
+        "sensex_wall_strike": sensex.wall_strike if sensex else None,
+        "raw_json": json.dumps(
+            {
+                "leaders": [_merged_signal_payload(signal) for signal in rows[:10]],
+                "index_walls": [
+                    {
+                        "symbol": row.symbol,
+                        "bias": row.bias,
+                        "wall_type": row.wall_type,
+                        "wall_strike": row.wall_strike,
+                        "proximity_pct": row.proximity_pct,
+                    }
+                    for row in wall_rows
+                ],
+            }
+        ),
+    }
+
+    leader_payloads = [
+        {
+            "trading_day": trading_day,
+            "symbol": signal.symbol,
+            "rank": rank,
+            "scanned_at": _ensure_utc(scanned_at),
+            "signal_grade": signal.signal_grade,
+            "signal_reason": signal.signal_reason,
+            "volume_ratio": signal.volume_ratio,
+            "setup_type": signal.setup_type,
+            "confidence": signal.confidence,
+            "action_state": signal.action_state,
+            "ltp": signal.ltp,
+            "raw_json": json.dumps(_merged_signal_payload(signal)),
+        }
+        for rank, signal in enumerate(rows[:25], start=1)
+    ]
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            insert into market_eod_summary (
+                trading_day, scanned_at, symbol_source, total_signals, priority_signals,
+                top_symbol, top_grade, top_volume_ratio, top_signal_reason,
+                nifty_bias, nifty_wall_type, nifty_wall_strike,
+                sensex_bias, sensex_wall_type, sensex_wall_strike, raw_json
+            ) values (
+                %(trading_day)s, %(scanned_at)s, %(symbol_source)s, %(total_signals)s, %(priority_signals)s,
+                %(top_symbol)s, %(top_grade)s, %(top_volume_ratio)s, %(top_signal_reason)s,
+                %(nifty_bias)s, %(nifty_wall_type)s, %(nifty_wall_strike)s,
+                %(sensex_bias)s, %(sensex_wall_type)s, %(sensex_wall_strike)s, %(raw_json)s::jsonb
+            )
+            on conflict (trading_day) do update set
+                scanned_at = excluded.scanned_at,
+                symbol_source = excluded.symbol_source,
+                total_signals = excluded.total_signals,
+                priority_signals = excluded.priority_signals,
+                top_symbol = excluded.top_symbol,
+                top_grade = excluded.top_grade,
+                top_volume_ratio = excluded.top_volume_ratio,
+                top_signal_reason = excluded.top_signal_reason,
+                nifty_bias = excluded.nifty_bias,
+                nifty_wall_type = excluded.nifty_wall_type,
+                nifty_wall_strike = excluded.nifty_wall_strike,
+                sensex_bias = excluded.sensex_bias,
+                sensex_wall_type = excluded.sensex_wall_type,
+                sensex_wall_strike = excluded.sensex_wall_strike,
+                raw_json = excluded.raw_json
+            """,
+            summary_payload,
+        )
+
+        if leader_payloads:
+            cursor.execute("delete from stock_eod_leaders where trading_day = %s", (trading_day,))
+            cursor.executemany(
+                """
+                insert into stock_eod_leaders (
+                    trading_day, symbol, rank, scanned_at, signal_grade, signal_reason,
+                    volume_ratio, setup_type, confidence, action_state, ltp, raw_json
+                ) values (
+                    %(trading_day)s, %(symbol)s, %(rank)s, %(scanned_at)s, %(signal_grade)s, %(signal_reason)s,
+                    %(volume_ratio)s, %(setup_type)s, %(confidence)s, %(action_state)s, %(ltp)s, %(raw_json)s::jsonb
+                )
+                """,
+                leader_payloads,
+            )
+    connection.commit()
+    return 1, len(leader_payloads)
+
+
+def load_latest_market_eod_summary(connection) -> dict[str, Any] | None:
+    with connection.cursor(row_factory=_dict_row_factory()) as cursor:
+        cursor.execute(
+            """
+            select *
+            from market_eod_summary
+            order by trading_day desc
+            limit 1
+            """
+        )
+        row = cursor.fetchone()
+        if not row:
+            return None
+
+        cursor.execute(
+            """
+            select symbol, rank, signal_grade, signal_reason, volume_ratio, setup_type, confidence, action_state, ltp
+            from stock_eod_leaders
+            where trading_day = %s
+            order by rank asc, symbol asc
+            """,
+            (row["trading_day"],),
+        )
+        leaders = cursor.fetchall()
+
+    return {
+        "summary": dict(row),
+        "leaders": tuple(dict(item) for item in leaders),
+    }
+
+
+def _trading_day_for(value: datetime) -> date:
+    return _ensure_utc(value).astimezone(ZoneInfo("Asia/Kolkata")).date()
 
 
 def _require_psycopg():

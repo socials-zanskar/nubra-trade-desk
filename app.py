@@ -10,10 +10,13 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from nubra_dash.bootstrap import load_local_env
 from nubra_dash.ui.mission_control import render_mission_control_home
 from nubra_dash.ui.runtime import load_snapshot_with_feedback, render_refresh_bar
 from nubra_dash.ui.shell import get_runtime_app_config, get_selected_symbols, render_sidebar
 from nubra_dash.ui.theme import inject_css
+
+load_local_env()
 
 
 st.set_page_config(

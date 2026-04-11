@@ -11,11 +11,14 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from nubra_dash.bootstrap import load_local_env
 from nubra_dash.models import VolumeSignal
 from nubra_dash.ui.runtime import load_snapshot_with_feedback, render_refresh_bar
 from nubra_dash.ui.shell import get_runtime_app_config, get_selected_symbols, render_sidebar
 from nubra_dash.ui.theme import inject_css
 from nubra_dash.ui.widgets import callout, dataframe_card, metric_card, section_header
+
+load_local_env()
 
 
 inject_css()
@@ -33,8 +36,81 @@ snapshot, used_cache = load_snapshot_with_feedback(
 )
 
 volume_rows = [row for row in snapshot["volume_batch"].rows if isinstance(row, VolumeSignal)]
+eod_summary = snapshot.get("eod_summary")
 errors = snapshot["volume_batch"].errors
 top_ratio = max((row.volume_ratio or 0.0 for row in volume_rows), default=0.0)
+
+if snapshot.get("is_post_close") and eod_summary:
+    summary = dict(eod_summary.get("summary") or {})
+    leaders = tuple(eod_summary.get("leaders") or ())
+    st.markdown(
+        """
+        <div class="nubra-desk-hero">
+          <div class="nubra-kicker">Today's volume</div>
+          <h1 class="nubra-desk-title">Participation into the close</h1>
+          <p class="nubra-desk-copy">
+            The session is over, so this page shifts from live scan mode into an end-of-day participation board. Use it to see which names truly commanded attention by the close.
+          </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    cols = st.columns(4)
+    with cols[0]:
+        metric_card("Top symbol", str(summary.get("top_symbol") or "None"), "Highest-ranked stored leader.")
+    with cols[1]:
+        metric_card("Top ratio", f"{float(summary.get('top_volume_ratio') or 0.0):.2f}x", "Best abnormal participation captured today.", accent="#57b6ff")
+    with cols[2]:
+        metric_card("Priority names", str(summary.get("priority_signals") or 0), "Names worth reviewing after the close.", accent="#f8b84e")
+    with cols[3]:
+        metric_card("Stored leaders", str(len(leaders)), "Rows preserved for today's close board.", accent="#24c48e")
+
+    left, right = st.columns([1.15, 0.85], gap="large")
+    with left:
+        section_header("Top participation today", "Best names from the final EOD board.")
+        if leaders:
+            leaderboard = pd.DataFrame(
+                [
+                    {
+                        "symbol": row.get("symbol"),
+                        "volume ratio": round(float(row.get("volume_ratio") or 0.0), 2),
+                    }
+                    for row in leaders[:10]
+                ]
+            )
+            st.bar_chart(leaderboard.set_index("symbol"), height=320)
+            dataframe_card(
+                [
+                    {
+                        "rank": row.get("rank"),
+                        "symbol": row.get("symbol"),
+                        "volume ratio": round(float(row.get("volume_ratio") or 0.0), 2),
+                        "state": row.get("action_state"),
+                        "reason": row.get("signal_reason"),
+                    }
+                    for row in leaders[:12]
+                ]
+            )
+        else:
+            callout("No close leaders yet", "The post-close sync will populate today's participation board.")
+
+    with right:
+        section_header("Close read", "What the volume board says after the bell.")
+        callout(
+            "Strongest name",
+            f"{summary.get('top_symbol') or 'None'} printed the strongest stored ratio at {float(summary.get('top_volume_ratio') or 0.0):.2f}x.",
+        )
+        callout(
+            "Index backdrop",
+            f"NIFTY: {summary.get('nifty_bias') or 'No saved bias'} | SENSEX: {summary.get('sensex_bias') or 'No saved bias'}",
+        )
+        if summary.get("top_signal_reason"):
+            callout("Why it mattered", str(summary.get("top_signal_reason")))
+
+    if used_cache:
+        st.caption("Showing the latest stored close summary for faster response.")
+    st.stop()
 
 st.markdown(
     """

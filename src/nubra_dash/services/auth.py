@@ -31,12 +31,15 @@ def create_session(auth: AuthConfig) -> AuthSession:
         env_value = getattr(nubra_env, env_name, None)
         if env_value is None:
             raise ValueError(f"Unsupported Nubra environment: {env_name}")
+        use_totp_login = _should_use_totp_login()
 
         with _patched_nubra_prompts():
             if auth.use_env_creds:
-                client = init_sdk(env_value, env_creds=True)
+                client = init_sdk(env_value, env_creds=True, totp_login=use_totp_login)
             else:
                 sdk_kwargs = {key: value for key, value in auth.extra.items() if value}
+                if use_totp_login:
+                    sdk_kwargs.setdefault("totp_login", True)
                 if auth.username:
                     sdk_kwargs.setdefault("username", auth.username)
                 if auth.password:
@@ -122,20 +125,24 @@ def _build_prompt_handler(original_input):
 
 
 def _resolve_otp() -> str | None:
+    totp_secret = (os.getenv("NUBRA_TOTP_SECRET", "") or "").strip().replace(" ", "")
+    if totp_secret:
+        try:
+            import pyotp
+        except Exception as exc:  # pragma: no cover - import fallback
+            raise RuntimeError("pyotp is required for automated Nubra TOTP auth.") from exc
+
+        try:
+            return pyotp.TOTP(totp_secret).now()
+        except Exception as exc:
+            raise RuntimeError("Failed to generate Nubra OTP from NUBRA_TOTP_SECRET.") from exc
+
     direct_otp = (os.getenv("NUBRA_OTP", "") or "").strip()
     if direct_otp:
         return direct_otp
 
-    totp_secret = (os.getenv("NUBRA_TOTP_SECRET", "") or "").strip().replace(" ", "")
-    if not totp_secret:
-        return None
+    return None
 
-    try:
-        import pyotp
-    except Exception as exc:  # pragma: no cover - import fallback
-        raise RuntimeError("pyotp is required for automated Nubra TOTP auth.") from exc
 
-    try:
-        return pyotp.TOTP(totp_secret).now()
-    except Exception as exc:
-        raise RuntimeError("Failed to generate Nubra OTP from NUBRA_TOTP_SECRET.") from exc
+def _should_use_totp_login() -> bool:
+    return bool((os.getenv("NUBRA_TOTP_SECRET", "") or "").strip())

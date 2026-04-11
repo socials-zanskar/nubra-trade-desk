@@ -311,3 +311,41 @@ create table if not exists sync_runs (
     symbol_count integer not null,
     details_json jsonb not null default '{}'::jsonb
 );
+
+create table if not exists market_eod_summary (
+    trading_day date primary key,
+    scanned_at timestamptz not null,
+    symbol_source text not null,
+    total_signals integer not null default 0,
+    priority_signals integer not null default 0,
+    top_symbol text references symbols(symbol) on delete set null,
+    top_grade text,
+    top_volume_ratio double precision,
+    top_signal_reason text,
+    nifty_bias text,
+    nifty_wall_type text,
+    nifty_wall_strike double precision,
+    sensex_bias text,
+    sensex_wall_type text,
+    sensex_wall_strike double precision,
+    raw_json jsonb not null default '{}'::jsonb
+);
+
+create table if not exists stock_eod_leaders (
+    trading_day date not null,
+    symbol text not null references symbols(symbol) on delete cascade,
+    rank integer not null,
+    scanned_at timestamptz not null,
+    signal_grade text not null,
+    signal_reason text not null,
+    volume_ratio double precision,
+    setup_type text,
+    confidence double precision,
+    action_state text,
+    ltp double precision,
+    raw_json jsonb not null default '{}'::jsonb,
+    primary key (trading_day, symbol)
+);
+
+create index if not exists idx_stock_eod_leaders_day_rank
+    on stock_eod_leaders(trading_day desc, rank asc);

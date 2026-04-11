@@ -11,12 +11,15 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from nubra_dash.bootstrap import load_local_env
 from nubra_dash.models import OIWallCandidate, WallSignal
 from nubra_dash.services import slice_chain_window
 from nubra_dash.ui.runtime import load_snapshot_with_feedback, render_refresh_bar
 from nubra_dash.ui.shell import get_runtime_app_config, get_selected_symbols, render_sidebar
 from nubra_dash.ui.theme import inject_css
 from nubra_dash.ui.widgets import callout, dataframe_card, hero, metric_card, section_header
+
+load_local_env()
 
 
 def _build_focus_figure(frame, *, spot: float, selected_strikes: set[float], selected_side: str | None) -> go.Figure:

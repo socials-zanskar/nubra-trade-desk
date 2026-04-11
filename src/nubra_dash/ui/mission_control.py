@@ -23,6 +23,16 @@ def render_mission_control_home(
     volume_rows = tuple(snapshot["volume_batch"].rows or ())
     wall_rows = tuple(snapshot["index_wall_batch"].rows or ())
     index_rows = [row for row in wall_rows if isinstance(row, WallSignal)]
+    eod_summary = snapshot.get("eod_summary")
+
+    if snapshot.get("is_post_close") and eod_summary:
+        _render_eod_mission_control(
+            eod_summary=eod_summary,
+            selected_symbols=selected_symbols,
+            auth_session=auth_session,
+            used_cache=used_cache,
+        )
+        return
 
     actionables = [signal for signal in merged if (signal.volume_ratio or 0.0) >= 1.5]
     watchers = [signal for signal in merged if 1.1 <= (signal.volume_ratio or 0.0) < 1.5]
@@ -120,6 +130,89 @@ def render_mission_control_home(
 
     if used_cache:
         st.caption("Showing the latest stored snapshot for faster response.")
+
+
+def _render_eod_mission_control(
+    *,
+    eod_summary: dict[str, object],
+    selected_symbols: tuple[str, ...],
+    auth_session,
+    used_cache: bool,
+) -> None:
+    summary = dict(eod_summary.get("summary") or {})
+    leaders = tuple(eod_summary.get("leaders") or ())
+    regime_bias = _resolve_eod_bias(summary)
+    close_note = _close_snapshot_label(summary.get("scanned_at"))
+    session_live = bool(auth_session and auth_session.is_available)
+    priority_leaders = leaders[:5]
+
+    st.markdown(
+        f"""
+        <div class="nubra-desk-hero">
+          <div class="nubra-kicker">Today's market</div>
+          <h1 class="nubra-desk-title">Close summary</h1>
+          <p class="nubra-subtle nubra-mission-copy">
+            <span class="nubra-chip tone-blue">{len(selected_symbols)} names tracked</span>
+            <span class="nubra-chip tone-green">{summary.get("priority_signals", 0)} priority setups</span>
+            <span class="nubra-chip tone-cyan">{summary.get("top_symbol") or "No leader"}</span>
+            <span class="nubra-chip tone-purple">{close_note}</span>
+          </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    kpi_cols = st.columns(4, gap="small")
+    kpi_rows = [
+        ("Top symbol", str(summary.get("top_symbol") or "None"), "Best name into the close", "#57b6ff", _sparkline(_metric_wave(len(leaders) or 1))),
+        ("Priority", str(summary.get("priority_signals") or 0), "Signals that stayed front-board", "#22C55E", _sparkline(_metric_wave(int(summary.get("priority_signals") or 0)))),
+        ("Top ratio", f"{float(summary.get('top_volume_ratio') or 0.0):.2f}x", "Best participation print today", "#F8B84E", _sparkline(_metric_wave(int(float(summary.get('top_volume_ratio') or 0.0) * 2) or 1))),
+        ("Regime", regime_bias, "Index pressure at the close", _regime_accent(regime_bias), _sparkline(_metric_wave(2 if 'Balanced' in regime_bias else 4))),
+    ]
+    for col, (label, value, detail, accent, sparkline) in zip(kpi_cols, kpi_rows, strict=True):
+        with col:
+            _status_tile(label, value, detail, accent=accent, sparkline=sparkline, live=session_live)
+
+    st.write("")
+    left_col, center_col, right_col = st.columns([0.25, 0.5, 0.25], gap="large")
+
+    with left_col:
+        st.markdown(_rail_header("Immediate focus", "Leaders worth revisiting"), unsafe_allow_html=True)
+        if priority_leaders:
+            for row in priority_leaders:
+                _focus_card(
+                    f"{row.get('rank', '-')}. {row.get('symbol', 'Unknown')}",
+                    row.get("signal_reason") or "Stored EOD leader.",
+                    f"{row.get('action_state') or 'Watch'} | {float(row.get('volume_ratio') or 0.0):.2f}x",
+                    accent=_grade_color(str(row.get("signal_grade") or "C")),
+                )
+        else:
+            callout("No leaders saved", "The post-close summary will populate here once an EOD sync completes.")
+
+    with center_col:
+        st.markdown(_panel_header("Signal momentum", "Top setups at the close"), unsafe_allow_html=True)
+        if leaders:
+            st.plotly_chart(_build_eod_momentum_figure(leaders[:8]), use_container_width=True, theme=None)
+            st.write("")
+            st.markdown(_panel_header("Priority board", "Clean summary of today's strongest names"), unsafe_allow_html=True)
+            compact_table(_top_eod_rows(leaders[:10]))
+        else:
+            callout("No close board", "No leaders were stored for the current trading day.")
+
+    with right_col:
+        st.markdown(_rail_header("Index pressure", "NIFTY and SENSEX at close"), unsafe_allow_html=True)
+        for item in _eod_index_events(summary):
+            _event_card(item["title"], item["body"], item["footer"], accent=item["accent"])
+
+        st.write("")
+        st.markdown(_rail_header("Market feed", "Close-time takeaways"), unsafe_allow_html=True)
+        st.markdown('<div class="nubra-feed" style="max-height: 24rem; overflow-y:auto; padding-right:0.2rem;">', unsafe_allow_html=True)
+        for item in _eod_feed_items(summary, leaders):
+            _event_card(item["title"], item["body"], item["footer"], accent=item["accent"])
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    if used_cache:
+        st.caption("Showing the latest stored close snapshot for fast response.")
 
 
 def _status_tile(
@@ -271,6 +364,54 @@ def _build_momentum_figure(rows: list[MergedSignal]) -> go.Figure:
     return fig
 
 
+def _build_eod_momentum_figure(rows: tuple[dict[str, object], ...] | list[dict[str, object]]) -> go.Figure:
+    frame = pd.DataFrame(
+        [
+            {
+                "symbol": row.get("symbol"),
+                "volume_ratio": float(row.get("volume_ratio") or 0.0),
+                "grade": row.get("signal_grade"),
+                "signal": row.get("signal_reason"),
+            }
+            for row in rows
+        ]
+    )
+    if frame.empty:
+        return go.Figure()
+
+    colors = [_grade_color(str(grade or "C")) for grade in frame["grade"]]
+    fig = go.Figure()
+    fig.add_bar(
+        x=frame["volume_ratio"],
+        y=frame["symbol"],
+        orientation="h",
+        marker=dict(color=colors, line=dict(color="rgba(255,255,255,0.12)", width=1)),
+        customdata=frame[["grade", "signal"]],
+        hovertemplate="<b>%{y}</b><br>Ratio %{x:.2f}x<br>Grade %{customdata[0]}<br>%{customdata[1]}<extra></extra>",
+    )
+    fig.update_layout(
+        height=460,
+        margin=dict(l=10, r=10, t=10, b=10),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+        xaxis=dict(
+            title="Volume ratio",
+            gridcolor="rgba(255,255,255,0.06)",
+            zerolinecolor="rgba(255,255,255,0.08)",
+            tickfont=dict(color="#9aa9bb"),
+            title_font=dict(color="#9aa9bb"),
+        ),
+        yaxis=dict(
+            title="Symbol",
+            tickfont=dict(color="#e8f1f8", family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"),
+            title_font=dict(color="#9aa9bb"),
+        ),
+        font=dict(color="#e8f1f8"),
+    )
+    return fig
+
+
 def _signal_feed_items(
     merged: tuple[MergedSignal, ...],
     volume_rows: tuple[object, ...],
@@ -329,6 +470,19 @@ def _top_signal_rows(merged: tuple[MergedSignal, ...]) -> list[dict[str, object]
             }
         )
     return rows
+
+
+def _top_eod_rows(rows: tuple[dict[str, object], ...] | list[dict[str, object]]) -> list[dict[str, object]]:
+    return [
+        {
+            "symbol": row.get("symbol"),
+            "state": row.get("action_state") or "Watch",
+            "grade": row.get("signal_grade") or "C",
+            "volume ratio": f"{float(row.get('volume_ratio') or 0.0):.2f}x",
+            "desk note": row.get("signal_reason") or "Stored EOD leader.",
+        }
+        for row in rows
+    ]
 
 
 def _grade_color(grade: str) -> str:
@@ -392,3 +546,70 @@ def _signal_summary(signal: MergedSignal) -> str:
     if ratio >= 1.1:
         return "Participation is improving, but it still needs confirmation before it belongs in execution prep."
     return "Activity is present, but the move is not strong enough to force attention."
+
+
+def _resolve_eod_bias(summary: dict[str, object]) -> str:
+    biases = [str(summary.get("nifty_bias") or ""), str(summary.get("sensex_bias") or "")]
+    bearish = sum(1 for bias in biases if bias.lower().startswith("bear"))
+    bullish = sum(1 for bias in biases if bias.lower().startswith("bull"))
+    if bearish > bullish:
+        return "Bearish pressure"
+    if bullish > bearish:
+        return "Bullish pressure"
+    return "Balanced pressure"
+
+
+def _close_snapshot_label(scanned_at: object) -> str:
+    if not scanned_at:
+        return "Close snapshot pending"
+    return f"Close stored {str(scanned_at)[:16].replace('T', ' ')}"
+
+
+def _eod_index_events(summary: dict[str, object]) -> list[dict[str, str]]:
+    items = []
+    nifty_title = f"NIFTY | {summary.get('nifty_wall_type') or 'N/A'} {float(summary.get('nifty_wall_strike') or 0.0):.0f}"
+    sensex_title = f"SENSEX | {summary.get('sensex_wall_type') or 'N/A'} {float(summary.get('sensex_wall_strike') or 0.0):.0f}"
+    items.append(
+        {
+            "title": nifty_title,
+            "body": str(summary.get("nifty_bias") or "No closing wall bias saved."),
+            "footer": "NIFTY close",
+            "accent": "#3B82F6",
+        }
+    )
+    items.append(
+        {
+            "title": sensex_title,
+            "body": str(summary.get("sensex_bias") or "No closing wall bias saved."),
+            "footer": "SENSEX close",
+            "accent": "#9b8cff",
+        }
+    )
+    return items
+
+
+def _eod_feed_items(summary: dict[str, object], leaders: tuple[dict[str, object], ...]) -> list[dict[str, str]]:
+    items = [
+        {
+            "title": "Top close leader",
+            "body": f"{summary.get('top_symbol') or 'No leader'} closed as the strongest stored setup with {float(summary.get('top_volume_ratio') or 0.0):.2f}x participation.",
+            "footer": "Leader | close",
+            "accent": "#22C55E",
+        },
+        {
+            "title": "Priority count",
+            "body": f"{int(summary.get('priority_signals') or 0)} names held priority status into the final stored snapshot.",
+            "footer": "Board | close",
+            "accent": "#F8B84E",
+        },
+    ]
+    for row in leaders[:3]:
+        items.append(
+            {
+                "title": str(row.get("symbol") or "Leader"),
+                "body": str(row.get("signal_reason") or "Stored EOD leader."),
+                "footer": f"{row.get('action_state') or 'Watch'} | {float(row.get('volume_ratio') or 0.0):.2f}x",
+                "accent": _grade_color(str(row.get("signal_grade") or "C")),
+            }
+        )
+    return items[:5]
