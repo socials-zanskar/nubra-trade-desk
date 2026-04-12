@@ -1239,6 +1239,17 @@ def store_index_multi_walls(
         }
         for row in rows
     ]
+    deduped_payload = list(
+        {
+            (
+                item["index_symbol"],
+                item["rank"],
+                item["strike"],
+                item["wall_side"],
+            ): item
+            for item in payload
+        }.values()
+    )
 
     with connection.cursor() as cursor:
         cursor.executemany(
@@ -1268,7 +1279,7 @@ def store_index_multi_walls(
                 %(raw_json)s::jsonb
             )
             """,
-            payload,
+            deduped_payload,
         )
         cursor.executemany(
             """
@@ -1297,10 +1308,10 @@ def store_index_multi_walls(
                 %(raw_json)s::jsonb
             )
             """,
-            payload,
+            deduped_payload,
         )
     connection.commit()
-    return len(payload), len(payload)
+    return len(deduped_payload), len(deduped_payload)
 
 
 def store_index_ladders(

@@ -194,8 +194,28 @@ create table if not exists index_multi_wall_latest (
     spot_price double precision,
     scanned_at timestamptz not null,
     raw_json jsonb not null default '{}'::jsonb,
-    primary key (index_symbol, rank, strike)
+    primary key (index_symbol, rank, strike, wall_side)
 );
+
+do $$
+begin
+    if exists (
+        select 1
+        from pg_constraint
+        where conname = 'index_multi_wall_latest_pkey'
+          and conrelid = 'index_multi_wall_latest'::regclass
+    ) then
+        begin
+            alter table index_multi_wall_latest drop constraint index_multi_wall_latest_pkey;
+        exception
+            when undefined_object then null;
+        end;
+        alter table index_multi_wall_latest
+            add constraint index_multi_wall_latest_pkey
+            primary key (index_symbol, rank, strike, wall_side);
+    end if;
+end
+$$;
 
 create table if not exists index_multi_wall_history (
     id bigserial primary key,
