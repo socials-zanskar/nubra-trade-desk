@@ -42,6 +42,6 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           SCAN_BATCH_SIZE: ${{ secrets.SCAN_BATCH_SIZE }}
           SCAN_REFRESH_MINUTES: ${{ secrets.SCAN_REFRESH_MINUTES }}
-          SCAN_SYMBOL_SOURCE: ${{ secrets.SCAN_SYMBOL_SOURCE }}
-          SCAN_SYMBOLS_CSV: ${{ secrets.SCAN_SYMBOLS_CSV }}
+          SCAN_SYMBOL_SOURCE: csv
+          SCAN_SYMBOLS_CSV: data/universes/nifty300_symbols.csv
         run: python scripts/sync_supabase_snapshots.py

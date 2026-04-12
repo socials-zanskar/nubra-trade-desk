@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import csv
 import os
+from pathlib import Path
 from typing import Final
 
 
@@ -16,6 +18,31 @@ DEFAULT_BREAKOUT_RANK: Final[int] = 20
 DEFAULT_REFRESH_SECONDS: Final[int] = 45
 DEFAULT_MULTI_WALL_TOP_N: Final[int] = 3
 DEFAULT_VOLUME_INTERVAL: Final[str] = "5m"
+ROOT_DIR: Final[Path] = Path(__file__).resolve().parents[2]
+DATA_UNIVERSES_DIR: Final[Path] = ROOT_DIR / "data" / "universes"
+DEFAULT_MARKET_300_CSV: Final[Path] = DATA_UNIVERSES_DIR / "nifty300_symbols.csv"
+DEFAULT_MARKET_500_CSV: Final[Path] = DATA_UNIVERSES_DIR / "nifty500_symbols.csv"
+
+
+def _load_universe_rows(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        rows: list[dict[str, str]] = []
+        for raw in reader:
+            symbol = (raw.get("symbol") or "").strip().upper()
+            if not symbol:
+                continue
+            rows.append(
+                {
+                    "symbol": symbol,
+                    "exchange": (raw.get("exchange") or "NSE").strip().upper(),
+                    "sector": (raw.get("sector") or "").strip(),
+                    "industry": (raw.get("industry") or "").strip(),
+                }
+            )
+        return rows
 DEFAULT_DEMO_SYMBOLS: Final[tuple[str, ...]] = (
     "RELIANCE",
     "HDFCBANK",
@@ -107,8 +134,16 @@ LIQUID_STOCKS_SYMBOLS: Final[tuple[str, ...]] = (
     "SHRIRAMFIN",
     "DRREDDY",
 )
+MARKET_300_SYMBOLS: Final[tuple[str, ...]] = tuple(
+    row["symbol"] for row in _load_universe_rows(DEFAULT_MARKET_300_CSV)
+)
+MARKET_500_SYMBOLS: Final[tuple[str, ...]] = tuple(
+    row["symbol"] for row in _load_universe_rows(DEFAULT_MARKET_500_CSV)
+)
 BASKET_PRESETS: Final[dict[str, tuple[str, ...]]] = {
     "Top FNO Stocks": TOP_FNO_SYMBOLS,
+    "Market Leaders 300": MARKET_300_SYMBOLS or LIQUID_STOCKS_SYMBOLS,
+    "Broad Market 500": MARKET_500_SYMBOLS or LIQUID_STOCKS_SYMBOLS,
     "Indices": INDICES_SYMBOLS,
     "Liquid Stocks": LIQUID_STOCKS_SYMBOLS,
     "Custom": (),
@@ -166,7 +201,7 @@ class ScanConfig:
     volume_interval: str = DEFAULT_VOLUME_INTERVAL
     timezone: str = DEFAULT_TIMEZONE
     demo_symbols: tuple[str, ...] = DEFAULT_DEMO_SYMBOLS
-    default_basket: str = "Top FNO Stocks"
+    default_basket: str = "Market Leaders 300"
     enable_admin_refresh: bool = False
     enable_live_drilldown: bool = False
 
@@ -181,7 +216,7 @@ class ScanConfig:
             volume_interval=DEFAULT_VOLUME_INTERVAL,
             timezone=DEFAULT_TIMEZONE,
             demo_symbols=DEFAULT_DEMO_SYMBOLS,
-            default_basket="Top FNO Stocks",
+            default_basket="Market Leaders 300",
             enable_admin_refresh=_env_flag(ENV_ENABLE_ADMIN_REFRESH),
             enable_live_drilldown=_env_flag(ENV_ENABLE_LIVE_DRILLDOWN),
         )
@@ -224,9 +259,9 @@ class DatabaseConfig:
 class SchedulerConfig:
     batch_size: int = 50
     refresh_minutes: int = 10
-    symbol_source: str = "top_fno"
+    symbol_source: str = "csv"
     sectors: tuple[str, ...] = ()
-    symbols_csv: str | None = None
+    symbols_csv: str | None = str(DEFAULT_MARKET_300_CSV)
 
     @classmethod
     def from_env(cls) -> "SchedulerConfig":
@@ -239,9 +274,9 @@ class SchedulerConfig:
         return cls(
             batch_size=int(os.getenv(ENV_SCAN_BATCH_SIZE, "50") or 50),
             refresh_minutes=int(os.getenv(ENV_SCAN_REFRESH_MINUTES, "10") or 10),
-            symbol_source=(os.getenv(ENV_SCAN_SYMBOL_SOURCE, "top_fno") or "top_fno").strip().lower(),
+            symbol_source=(os.getenv(ENV_SCAN_SYMBOL_SOURCE, "csv") or "csv").strip().lower(),
             sectors=sectors,
-            symbols_csv=symbols_csv,
+            symbols_csv=symbols_csv or str(DEFAULT_MARKET_300_CSV),
         )
 
 
@@ -279,6 +314,24 @@ class AppConfig:
 def load_app_config() -> AppConfig:
     """Convenience entry point used by the app shell later."""
     return AppConfig.from_env()
+
+
+def load_market_universe_rows(basket_name: str) -> list[dict[str, str]]:
+    if basket_name == "Market Leaders 300":
+        return _load_universe_rows(DEFAULT_MARKET_300_CSV)
+    if basket_name == "Broad Market 500":
+        return _load_universe_rows(DEFAULT_MARKET_500_CSV)
+    rows: list[dict[str, str]] = []
+    for symbol in resolve_symbols_for_basket(basket_name):
+        rows.append(
+            {
+                "symbol": symbol,
+                "exchange": "NSE",
+                "sector": "",
+                "industry": "",
+            }
+        )
+    return rows
 
 
 def get_basket_options() -> tuple[str, ...]:

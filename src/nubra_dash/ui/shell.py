@@ -2,7 +2,14 @@ from __future__ import annotations
 
 import streamlit as st
 
-from nubra_dash.config import LIQUID_STOCKS_SYMBOLS, TOP_FNO_SYMBOLS, get_basket_options, load_app_config, resolve_symbols_for_basket
+from nubra_dash.config import (
+    LIQUID_STOCKS_SYMBOLS,
+    MARKET_300_SYMBOLS,
+    TOP_FNO_SYMBOLS,
+    get_basket_options,
+    load_app_config,
+    resolve_symbols_for_basket,
+)
 
 
 PAGES = [
@@ -36,7 +43,7 @@ def render_sidebar() -> None:
         selected_basket = config.scans.default_basket
     custom_symbols = st.session_state.get("nubra_custom_symbols", "")
     custom_symbol_values = [item.strip().upper() for item in custom_symbols.split(",") if item.strip()]
-    searchable_custom_pool = tuple(dict.fromkeys((*TOP_FNO_SYMBOLS, *LIQUID_STOCKS_SYMBOLS)))
+    searchable_custom_pool = tuple(dict.fromkeys((*TOP_FNO_SYMBOLS, *LIQUID_STOCKS_SYMBOLS, *MARKET_300_SYMBOLS)))
 
     nav_html = "".join(
         f'<a class="nubra-nav-link" href="{href}" target="_self">{label}</a>'

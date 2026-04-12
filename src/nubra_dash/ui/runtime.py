@@ -26,8 +26,11 @@ def load_live_snapshot(
     now = time.time()
 
     cached = st.session_state.get(cache_key)
-    if cached and (now - cached["ts"] < ttl):
-        return cached["snapshot"], True
+    if cached:
+        if prefer_database and not live_auth:
+            return cached["snapshot"], True
+        if now - cached["ts"] < ttl:
+            return cached["snapshot"], True
 
     snapshot = get_dashboard_snapshot(
         config,
