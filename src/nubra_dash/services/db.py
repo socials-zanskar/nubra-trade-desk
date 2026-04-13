@@ -635,6 +635,211 @@ def upsert_symbols(
     return len(payload)
 
 
+def upsert_instruments(
+    connection,
+    rows: Iterable[dict[str, Any]],
+) -> int:
+    payload = list(rows)
+    if not payload:
+        return 0
+    with connection.cursor() as cursor:
+        cursor.executemany(
+            """
+            insert into instruments (
+                symbol,
+                display_name,
+                exchange,
+                ref_id,
+                tick_size,
+                lot_size,
+                instrument_type,
+                is_active,
+                source,
+                raw_json
+            )
+            values (
+                %(symbol)s,
+                %(display_name)s,
+                %(exchange)s,
+                %(ref_id)s,
+                %(tick_size)s,
+                %(lot_size)s,
+                %(instrument_type)s,
+                %(is_active)s,
+                %(source)s,
+                %(raw_json)s::jsonb
+            )
+            on conflict (symbol, exchange) do update set
+                display_name = excluded.display_name,
+                ref_id = excluded.ref_id,
+                tick_size = excluded.tick_size,
+                lot_size = excluded.lot_size,
+                instrument_type = excluded.instrument_type,
+                is_active = excluded.is_active,
+                source = excluded.source,
+                raw_json = excluded.raw_json,
+                updated_at = timezone('utc', now())
+            """,
+            payload,
+        )
+    connection.commit()
+    return len(payload)
+
+
+def upsert_dashboard_universe(
+    connection,
+    *,
+    slug: str,
+    title: str,
+    description: str | None = None,
+) -> None:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            insert into dashboard_universes (slug, title, description)
+            values (%s, %s, %s)
+            on conflict (slug) do update set
+                title = excluded.title,
+                description = excluded.description,
+                updated_at = timezone('utc', now())
+            """,
+            (slug, title, description),
+        )
+    connection.commit()
+
+
+def upsert_dashboard_universe_members(
+    connection,
+    *,
+    universe_slug: str,
+    rows: Iterable[dict[str, Any]],
+) -> int:
+    payload = list(rows)
+    if not payload:
+        return 0
+    with connection.cursor() as cursor:
+        cursor.executemany(
+            """
+            insert into dashboard_universe_members (
+                universe_slug,
+                symbol,
+                exchange,
+                sector,
+                industry,
+                sort_order,
+                is_active
+            )
+            values (
+                %(universe_slug)s,
+                %(symbol)s,
+                %(exchange)s,
+                %(sector)s,
+                %(industry)s,
+                %(sort_order)s,
+                %(is_active)s
+            )
+            on conflict (universe_slug, symbol, exchange) do update set
+                sector = excluded.sector,
+                industry = excluded.industry,
+                sort_order = excluded.sort_order,
+                is_active = excluded.is_active,
+                updated_at = timezone('utc', now())
+            """,
+            payload,
+        )
+    connection.commit()
+    return len(payload)
+
+
+def upsert_stock_taxonomy(
+    connection,
+    rows: Iterable[dict[str, Any]],
+) -> int:
+    payload = list(rows)
+    if not payload:
+        return 0
+    with connection.cursor() as cursor:
+        cursor.executemany(
+            """
+            insert into stock_taxonomy (
+                symbol,
+                exchange,
+                sector,
+                industry,
+                notes_json
+            )
+            values (
+                %(symbol)s,
+                %(exchange)s,
+                %(sector)s,
+                %(industry)s,
+                %(notes_json)s::jsonb
+            )
+            on conflict (symbol, exchange) do update set
+                sector = excluded.sector,
+                industry = excluded.industry,
+                notes_json = excluded.notes_json,
+                updated_at = timezone('utc', now())
+            """,
+            payload,
+        )
+    connection.commit()
+    return len(payload)
+
+
+def upsert_ohlcv_1m_bars(
+    connection,
+    rows: Iterable[dict[str, Any]],
+) -> int:
+    payload = list(rows)
+    if not payload:
+        return 0
+    with connection.cursor() as cursor:
+        cursor.executemany(
+            """
+            insert into ohlcv_1m_bars (
+                symbol,
+                exchange,
+                bucket_timestamp,
+                open_price,
+                high_price,
+                low_price,
+                close_price,
+                bucket_volume,
+                cumulative_volume,
+                source,
+                raw_json
+            )
+            values (
+                %(symbol)s,
+                %(exchange)s,
+                %(bucket_timestamp)s,
+                %(open_price)s,
+                %(high_price)s,
+                %(low_price)s,
+                %(close_price)s,
+                %(bucket_volume)s,
+                %(cumulative_volume)s,
+                %(source)s,
+                %(raw_json)s::jsonb
+            )
+            on conflict (symbol, exchange, bucket_timestamp) do update set
+                open_price = excluded.open_price,
+                high_price = excluded.high_price,
+                low_price = excluded.low_price,
+                close_price = excluded.close_price,
+                bucket_volume = excluded.bucket_volume,
+                cumulative_volume = excluded.cumulative_volume,
+                source = excluded.source,
+                raw_json = excluded.raw_json,
+                updated_at = timezone('utc', now())
+            """,
+            payload,
+        )
+    connection.commit()
+    return len(payload)
+
+
 def store_volume_batches(
     connection,
     *,
