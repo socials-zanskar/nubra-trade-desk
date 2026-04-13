@@ -234,35 +234,49 @@ def authenticate_nubra_session(environment: str) -> tuple[str, str]:
     is_ci = (os.getenv("GITHUB_ACTIONS", "") or "").strip().lower() == "true"
 
     with httpx.Client(timeout=20.0) as client:
-        start_response = client.post(
-            f"{_base_url(environment)}/sendphoneotp",
-            json={"phone": phone, "skip_totp": False},
-            headers={"Content-Type": "application/json"},
-        )
-        if start_response.status_code >= 400:
-            raise RuntimeError(_extract_error(start_response))
+        auth_token = ""
+        if totp_secret:
+            otp = resolve_otp({"next": "VERIFY_TOTP"}, totp_secret=totp_secret, allow_prompt=not is_ci)
+            totp_response = client.post(
+                f"{_base_url(environment)}/totp/login",
+                json={"phone": phone, "totp": int(otp), "otp": ""},
+                headers={"x-device-id": device_id},
+            )
+            if totp_response.status_code >= 400:
+                raise RuntimeError(_extract_error(totp_response))
+            auth_token = str(totp_response.json().get("auth_token") or "").strip()
+            if not auth_token:
+                raise RuntimeError("Nubra did not return auth_token after TOTP login.")
+        else:
+            start_response = client.post(
+                f"{_base_url(environment)}/sendphoneotp",
+                json={"phone": phone, "skip_totp": False},
+                headers={"Content-Type": "application/json"},
+            )
+            if start_response.status_code >= 400:
+                raise RuntimeError(_extract_error(start_response))
 
-        start_payload = start_response.json()
-        temp_token = str(start_payload.get("temp_token") or "").strip()
-        if not temp_token:
-            raise RuntimeError("Nubra did not return temp_token during auth start.")
+            start_payload = start_response.json()
+            temp_token = str(start_payload.get("temp_token") or "").strip()
+            if not temp_token:
+                raise RuntimeError("Nubra did not return temp_token during auth start.")
 
-        otp = resolve_otp(start_payload, totp_secret=totp_secret, allow_prompt=not is_ci)
-        verify_response = client.post(
-            f"{_base_url(environment)}/verifyphoneotp",
-            json={"phone": phone, "otp": otp},
-            headers={
-                "Content-Type": "application/json",
-                "x-temp-token": temp_token,
-                "x-device-id": device_id,
-            },
-        )
-        if verify_response.status_code >= 400:
-            raise RuntimeError(_extract_error(verify_response))
+            otp = resolve_otp(start_payload, totp_secret=totp_secret, allow_prompt=not is_ci)
+            verify_response = client.post(
+                f"{_base_url(environment)}/verifyphoneotp",
+                json={"phone": phone, "otp": otp},
+                headers={
+                    "Content-Type": "application/json",
+                    "x-temp-token": temp_token,
+                    "x-device-id": device_id,
+                },
+            )
+            if verify_response.status_code >= 400:
+                raise RuntimeError(_extract_error(verify_response))
 
-        auth_token = str(verify_response.json().get("auth_token") or "").strip()
-        if not auth_token:
-            raise RuntimeError("Nubra did not return auth_token after OTP verification.")
+            auth_token = str(verify_response.json().get("auth_token") or "").strip()
+            if not auth_token:
+                raise RuntimeError("Nubra did not return auth_token after OTP verification.")
 
         pin_response = client.post(
             f"{_base_url(environment)}/verifypin",
