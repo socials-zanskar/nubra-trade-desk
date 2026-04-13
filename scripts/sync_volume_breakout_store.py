@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import argparse
-import base64
 import csv
 import json
 import logging
 import os
 import sys
-from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -15,6 +13,7 @@ from zoneinfo import ZoneInfo
 
 import httpx
 import pandas as pd
+import pyotp
 from dotenv import load_dotenv
 
 
@@ -25,7 +24,6 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from nubra_dash.config import load_app_config
-from nubra_dash.services.auth import load_auth_session
 from nubra_dash.services.db import (
     apply_schema,
     connect_db,
@@ -74,20 +72,7 @@ def main() -> int:
 
     try:
         config = load_app_config()
-        config = replace(
-            config,
-            auth=replace(config.auth, mode="user", environment=args.environment, use_env_creds=True),
-        )
-        auth_session = load_auth_session(config.auth)
-        if not auth_session.is_available or auth_session.client is None:
-            raise RuntimeError(f"Nubra auth failed: {auth_session.error}")
-
-        session_token = _extract_session_token(auth_session.client)
-        if not session_token:
-            raise RuntimeError("Failed to extract Nubra session token from the authenticated SDK client.")
-        device_id = _extract_device_id(auth_session.client, session_token) or _default_device_id()
-        if not device_id:
-            raise RuntimeError("Unable to resolve device id. Set PHONE_NO or NUBRA_DEVICE_ID.")
+        session_token, device_id = authenticate_nubra_session(args.environment)
 
         instrument_rows = fetch_cash_stock_refdata(
             session_token=session_token,
@@ -234,55 +219,102 @@ def _default_device_id() -> str:
     return f"Nubra-OSS-{phone}" if phone else ""
 
 
-def _extract_session_token(client: Any) -> str | None:
-    token_data = getattr(client, "token_data", None)
-    if isinstance(token_data, dict):
-        for key in ("session_token", "access_token", "token"):
-            value = token_data.get(key)
-            if isinstance(value, str) and value.strip():
-                return value.strip()
+def authenticate_nubra_session(environment: str) -> tuple[str, str]:
+    phone = (os.getenv("PHONE_NO", "") or "").strip()
+    mpin = (os.getenv("MPIN", "") or "").strip()
+    device_id = (os.getenv("NUBRA_DEVICE_ID", "") or "").strip() or _default_device_id()
+    if not phone:
+        raise RuntimeError("PHONE_NO is required for volume breakout sync auth.")
+    if not mpin:
+        raise RuntimeError("MPIN is required for volume breakout sync auth.")
+    if not device_id:
+        raise RuntimeError("Unable to resolve Nubra device id.")
 
-    candidates = ("session_token", "access_token", "token", "jwt_token", "auth_token", "BEARER_TOKEN")
-    for name in candidates:
-        value = getattr(client, name, None)
-        if isinstance(value, str) and value.strip():
-            return value.strip()
-    for attr_name in ("client", "_client", "session", "_session", "auth"):
-        nested = getattr(client, attr_name, None)
-        if nested is None:
-            continue
-        for name in candidates:
-            value = getattr(nested, name, None)
-            if isinstance(value, str) and value.strip():
-                return value.strip()
-    return None
+    totp_secret = (os.getenv("NUBRA_TOTP_SECRET", "") or "").strip().replace(" ", "")
+    is_ci = (os.getenv("GITHUB_ACTIONS", "") or "").strip().lower() == "true"
+
+    with httpx.Client(timeout=20.0) as client:
+        start_response = client.post(
+            f"{_base_url(environment)}/sendphoneotp",
+            json={"phone": phone, "skip_totp": False},
+            headers={"Content-Type": "application/json"},
+        )
+        if start_response.status_code >= 400:
+            raise RuntimeError(_extract_error(start_response))
+
+        start_payload = start_response.json()
+        temp_token = str(start_payload.get("temp_token") or "").strip()
+        if not temp_token:
+            raise RuntimeError("Nubra did not return temp_token during auth start.")
+
+        otp = resolve_otp(start_payload, totp_secret=totp_secret, allow_prompt=not is_ci)
+        verify_response = client.post(
+            f"{_base_url(environment)}/verifyphoneotp",
+            json={"phone": phone, "otp": otp},
+            headers={
+                "Content-Type": "application/json",
+                "x-temp-token": temp_token,
+                "x-device-id": device_id,
+            },
+        )
+        if verify_response.status_code >= 400:
+            raise RuntimeError(_extract_error(verify_response))
+
+        auth_token = str(verify_response.json().get("auth_token") or "").strip()
+        if not auth_token:
+            raise RuntimeError("Nubra did not return auth_token after OTP verification.")
+
+        pin_response = client.post(
+            f"{_base_url(environment)}/verifypin",
+            json={"pin": mpin},
+            headers={
+                "Content-Type": "application/json",
+                "x-device-id": device_id,
+                "Authorization": f"Bearer {auth_token}",
+            },
+        )
+        if pin_response.status_code >= 400:
+            raise RuntimeError(_extract_error(pin_response))
+
+        session_token = str(pin_response.json().get("session_token") or "").strip()
+        if not session_token:
+            raise RuntimeError("Nubra did not return session_token after MPIN verification.")
+
+    return session_token, device_id
 
 
-def _extract_device_id(client: Any, session_token: str) -> str | None:
-    direct = (os.getenv("NUBRA_DEVICE_ID", "") or "").strip()
-    if direct:
-        return direct
+def resolve_otp(
+    start_payload: dict[str, Any],
+    *,
+    totp_secret: str,
+    allow_prompt: bool,
+) -> str:
+    flow = str(start_payload.get("next") or "").strip().upper()
+    direct_otp = (os.getenv("NUBRA_OTP", "") or "").strip()
+    if direct_otp:
+        return direct_otp
 
-    token_data = getattr(client, "token_data", None)
-    if isinstance(token_data, dict):
-        for key in ("device_id", "deviceId"):
-            value = token_data.get(key)
-            if isinstance(value, str) and value.strip():
-                return value.strip()
+    if flow == "VERIFY_TOTP":
+        if not totp_secret:
+            raise RuntimeError("NUBRA_TOTP_SECRET is required when Nubra requests TOTP verification.")
+        try:
+            return pyotp.TOTP(totp_secret).now()
+        except Exception as exc:
+            raise RuntimeError("Failed to generate TOTP from NUBRA_TOTP_SECRET.") from exc
 
-    try:
-        parts = session_token.split(".")
-        if len(parts) < 2:
-            return None
-        payload = parts[1]
-        padding = "=" * (-len(payload) % 4)
-        decoded = json.loads(base64.urlsafe_b64decode(payload + padding).decode("utf-8"))
-        value = decoded.get("deviceId")
-        if isinstance(value, str) and value.strip():
-            return value.strip()
-    except Exception:
-        return None
-    return None
+    if totp_secret:
+        try:
+            return pyotp.TOTP(totp_secret).now()
+        except Exception as exc:
+            raise RuntimeError("Failed to generate TOTP from NUBRA_TOTP_SECRET.") from exc
+
+    if not allow_prompt:
+        raise RuntimeError("Interactive OTP is disabled in GitHub Actions. Set NUBRA_TOTP_SECRET.")
+
+    otp = input("Enter Nubra OTP: ").strip()
+    if not otp:
+        raise RuntimeError("No OTP provided.")
+    return otp
 
 
 def _base_url(environment: str) -> str:
