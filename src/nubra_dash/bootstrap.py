@@ -38,6 +38,12 @@ def _load_streamlit_secrets() -> None:
     except Exception:
         return
 
-    for key, value in secrets.items():
+    try:
+        items = list(secrets.items())
+    except Exception:
+        # Hosted runners and non-Streamlit contexts often have no secrets.toml.
+        return
+
+    for key, value in items:
         if isinstance(value, (str, int, float, bool)):
             os.environ.setdefault(key, str(value))
