@@ -45,3 +45,22 @@ jobs:
           SCAN_SYMBOL_SOURCE: csv
           SCAN_SYMBOLS_CSV: data/universes/nifty300_symbols.csv
         run: python scripts/sync_supabase_snapshots.py
+
+      - name: Sync Volume Breakout storage for NubraOSS
+        env:
+          PHONE_NO: ${{ secrets.PHONE_NO }}
+          MPIN: ${{ secrets.MPIN }}
+          NUBRA_TOTP_SECRET: ${{ secrets.NUBRA_TOTP_SECRET }}
+          NUBRA_OI_WALLS_ENV: PROD
+          NUBRA_APP_ENV: production
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_DB_HOST: ${{ secrets.SUPABASE_DB_HOST }}
+          SUPABASE_DB_PORT: ${{ secrets.SUPABASE_DB_PORT }}
+          SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
+          SUPABASE_DB_USER: ${{ secrets.SUPABASE_DB_USER }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SCAN_SYMBOLS_CSV: data/universes/nifty300_symbols.csv
+          NUBRA_DEVICE_ID: Nubra-OSS-${{ secrets.PHONE_NO }}
+        run: python scripts/sync_volume_breakout_store.py --environment PROD --lookback-days 20
