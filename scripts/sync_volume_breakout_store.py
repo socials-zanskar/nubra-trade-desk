@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import sys
+import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -39,6 +40,9 @@ from nubra_dash.services.db import (
 logger = logging.getLogger("sync_volume_breakout_store")
 IST = ZoneInfo("Asia/Kolkata")
 MAX_SYMBOLS_PER_QUERY = 10
+HISTORICAL_MAX_RETRIES = 4
+HISTORICAL_RETRY_BACKOFF_SECONDS = 65
+HISTORICAL_INTER_BATCH_SLEEP_SECONDS = 0.35
 
 
 def configure_logging() -> None:
@@ -165,6 +169,7 @@ def main() -> int:
                     len(eligible_rows),
                     total_bar_rows,
                 )
+                time.sleep(HISTORICAL_INTER_BATCH_SLEEP_SECONDS)
 
             record_sync_run(
                 connection,
@@ -475,38 +480,69 @@ def fetch_historical_frames(
         ]
     }
 
+    last_error = "Unknown historical fetch failure."
     with httpx.Client(timeout=30.0) as client:
-        response = client.post(
-            f"{_base_url(environment)}/charts/timeseries",
-            json=payload,
-            headers=_request_headers(session_token, device_id),
-        )
-        if response.status_code >= 400:
-            raise RuntimeError(_extract_error(response))
-        data = response.json()
-    return normalize_history_payload(data)
+        for attempt in range(1, HISTORICAL_MAX_RETRIES + 1):
+            response = client.post(
+                f"{_base_url(environment)}/charts/timeseries",
+                json=payload,
+                headers=_request_headers(session_token, device_id),
+            )
+            if response.status_code < 400:
+                data = response.json()
+                return normalize_history_payload(data)
+
+            last_error = _extract_error(response)
+            if response.status_code == 403 and attempt < HISTORICAL_MAX_RETRIES:
+                logger.warning(
+                    "Historical request hit 403/rate window for %s symbols on attempt %s/%s. Cooling down for %ss.",
+                    len(symbols),
+                    attempt,
+                    HISTORICAL_MAX_RETRIES,
+                    HISTORICAL_RETRY_BACKOFF_SECONDS,
+                )
+                time.sleep(HISTORICAL_RETRY_BACKOFF_SECONDS)
+                continue
+            raise RuntimeError(last_error)
+    raise RuntimeError(last_error)
 
 
 def normalize_history_payload(payload: dict[str, Any]) -> dict[str, pd.DataFrame]:
     symbol_frames: dict[str, pd.DataFrame] = {}
     for result_item in payload.get("result", []):
-        for stock_data in result_item.get("values", []):
+        raw_values = result_item.get("values", [])
+        if isinstance(raw_values, dict):
+            values_iterable = [raw_values]
+        elif isinstance(raw_values, list):
+            values_iterable = raw_values
+        else:
+            values_iterable = []
+
+        for stock_data in values_iterable:
+            if not isinstance(stock_data, dict):
+                continue
             for symbol, symbol_chart in stock_data.items():
+                if not isinstance(symbol_chart, dict):
+                    continue
                 frame = pd.DataFrame(
                     {
                         "open": points_to_series(symbol_chart.get("open", [])),
                         "high": points_to_series(symbol_chart.get("high", [])),
                         "low": points_to_series(symbol_chart.get("low", [])),
                         "close": points_to_series(symbol_chart.get("close", [])),
-                        "cumulative_volume": points_to_series(symbol_chart.get("cumulative_volume", [])),
+                        "cumulative_volume": points_to_series(
+                            symbol_chart.get("cumulative_volume", []) or symbol_chart.get("tick_volume", [])
+                        ),
                     }
                 ).sort_index()
                 if frame.empty:
                     continue
                 frame = frame[~frame.index.duplicated(keep="last")]
+                frame["session_date"] = pd.Index(frame.index.date)
                 frame["bucket_volume"] = derive_bucket_volume(frame["cumulative_volume"])
                 for field in ("open", "high", "low", "close"):
                     frame[field] = frame[field] / 100.0
+                frame["symbol"] = str(symbol).strip().upper()
                 symbol_frames[str(symbol).strip().upper()] = frame
     return symbol_frames
 
