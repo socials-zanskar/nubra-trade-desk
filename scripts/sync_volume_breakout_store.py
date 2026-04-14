@@ -39,10 +39,10 @@ from nubra_dash.services.db import (
 
 logger = logging.getLogger("sync_volume_breakout_store")
 IST = ZoneInfo("Asia/Kolkata")
-MAX_SYMBOLS_PER_QUERY = 10
+MAX_SYMBOLS_PER_QUERY = 5
 HISTORICAL_MAX_RETRIES = 4
 HISTORICAL_RETRY_BACKOFF_SECONDS = 65
-HISTORICAL_INTER_BATCH_SLEEP_SECONDS = 0.35
+HISTORICAL_INTER_BATCH_SLEEP_SECONDS = 0.6
 
 
 def configure_logging() -> None:
@@ -58,7 +58,7 @@ def parse_args() -> argparse.Namespace:
         description="Sync instruments and 1-minute historical bars for the NubraOSS Volume Breakout dashboard."
     )
     parser.add_argument("--environment", default="PROD", choices=["PROD", "UAT"], help="Nubra environment.")
-    parser.add_argument("--lookback-days", type=int, default=20, help="Historical lookback window.")
+    parser.add_argument("--lookback-days", type=int, default=3, help="Historical lookback window.")
     parser.add_argument("--batch-size", type=int, default=50, help="Requested historical batch size.")
     parser.add_argument("--symbols-csv", default="data/universes/nifty300_symbols.csv", help="Tracked-universe CSV path.")
     parser.add_argument("--universe-slug", default="volume-breakout-v1", help="Universe slug stored in Supabase.")
@@ -464,6 +464,7 @@ def fetch_historical_frames(
     start_dt: datetime,
     end_dt: datetime,
 ) -> dict[str, pd.DataFrame]:
+    intra_day_only = start_dt.astimezone(IST).date() == end_dt.astimezone(IST).date()
     payload = {
         "query": [
             {
@@ -474,7 +475,7 @@ def fetch_historical_frames(
                 "startDate": start_dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
                 "endDate": end_dt.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
                 "interval": "1m",
-                "intraDay": True,
+                "intraDay": intra_day_only,
                 "realTime": False,
             }
         ]

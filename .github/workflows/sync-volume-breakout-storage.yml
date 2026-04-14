@@ -1,15 +1,13 @@
-name: Sync Supabase Snapshots
+name: Sync Volume Breakout Storage
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "45,55 3 * * 1-5"
-    - cron: "*/10 4-9 * * 1-5"
-    - cron: "0 10 * * 1-5"
-    - cron: "5 10 * * 1-5"
+    - cron: "20,50 4-9 * * 1-5"
+    - cron: "15 10 * * 1-5"
 
 jobs:
-  sync:
+  sync-volume-breakout:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,7 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Sync Nubra snapshots to Supabase
+      - name: Sync Volume Breakout storage for NubraOSS
         env:
           PHONE_NO: ${{ secrets.PHONE_NO }}
           MPIN: ${{ secrets.MPIN }}
@@ -40,8 +38,6 @@ jobs:
           SUPABASE_DB_NAME: ${{ secrets.SUPABASE_DB_NAME }}
           SUPABASE_DB_USER: ${{ secrets.SUPABASE_DB_USER }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          SCAN_BATCH_SIZE: ${{ secrets.SCAN_BATCH_SIZE }}
-          SCAN_REFRESH_MINUTES: ${{ secrets.SCAN_REFRESH_MINUTES }}
-          SCAN_SYMBOL_SOURCE: csv
           SCAN_SYMBOLS_CSV: data/universes/nifty300_symbols.csv
-        run: python scripts/sync_supabase_snapshots.py
+          NUBRA_DEVICE_ID: Nubra-OSS-${{ secrets.PHONE_NO }}
+        run: python scripts/sync_volume_breakout_store.py --environment PROD --lookback-days 3 --batch-size 5
