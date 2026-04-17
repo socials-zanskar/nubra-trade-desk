@@ -354,38 +354,6 @@ def inject_css() -> None:
             height: 2.85rem;
           }}
 
-          .nubra-shell-intro {{
-            display: flex;
-            justify-content: space-between;
-            gap: 1rem;
-            align-items: flex-end;
-            margin: 0.15rem 0 0.85rem 0;
-            padding: 0.15rem 0 0.35rem 0;
-          }}
-
-          .nubra-shell-title {{
-            color: var(--text);
-            font-size: 1rem;
-            font-weight: 800;
-            line-height: 1.15;
-            letter-spacing: -0.03em;
-          }}
-
-          .nubra-shell-copy {{
-            margin-top: 0.28rem;
-            color: var(--muted);
-            font-size: 0.78rem;
-            line-height: 1.45;
-            max-width: 54rem;
-          }}
-
-          .nubra-shell-badges {{
-            display: flex;
-            gap: 0.35rem;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            max-width: 26rem;
-          }}
 
           .nubra-nav-link {{
             display: inline-flex;
@@ -540,6 +508,57 @@ def inject_css() -> None:
           .nubra-inline-metric span {{
             color: var(--muted);
             font-size: 0.69rem;
+            line-height: 1.25;
+          }}
+
+          .nubra-control-note {{
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            padding: 0.72rem 0.9rem;
+            border-radius: 14px;
+            border: 1px solid rgba(31, 53, 82, 0.9);
+            background: linear-gradient(180deg, rgba(15, 27, 45, 0.98), rgba(11, 22, 36, 0.96));
+            color: var(--muted);
+            font-size: 0.78rem;
+            line-height: 1.4;
+          }}
+
+          .nubra-control-note strong {{
+            color: var(--text);
+          }}
+
+          .nubra-control-summary {{
+            min-height: 3.7rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.28rem;
+            padding: 0.65rem 0.8rem;
+            border-radius: 14px;
+            border: 1px solid rgba(31, 53, 82, 0.9);
+            background:
+              linear-gradient(180deg, rgba(15, 27, 45, 0.98), rgba(11, 22, 36, 0.96)),
+              radial-gradient(circle at top right, rgba(78, 161, 255, 0.08), transparent 28%);
+          }}
+
+          .nubra-control-summary-top {{
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+            align-items: center;
+          }}
+
+          .nubra-control-summary strong {{
+            color: var(--text);
+            font-size: 0.88rem;
+            line-height: 1.2;
+            font-weight: 800;
+          }}
+
+          .nubra-control-summary span {{
+            color: var(--muted);
+            font-size: 0.72rem;
             line-height: 1.25;
           }}
 
@@ -764,16 +783,6 @@ def inject_css() -> None:
 
             .nubra-topbar-spacer {{
               height: 5rem;
-            }}
-
-            .nubra-shell-intro {{
-              flex-direction: column;
-              align-items: flex-start;
-            }}
-
-            .nubra-shell-badges {{
-              justify-content: flex-start;
-              max-width: none;
             }}
 
             .nubra-refresh-bar {{

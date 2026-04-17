@@ -33,7 +33,6 @@ Use [.streamlit/secrets.toml.example](C:\Users\Aryan\Desktop\projects\Strategies
 - `OI Walls`: current-expiry NIFTY/SENSEX ladders
 - `Multi-Wall Explorer`: focused index strike structure
 - `Symbol Drilldown`: one-stock narrative view
-- `Watchlist + Alerts`: session watchlist workflow
 
 ## Next backend step
 

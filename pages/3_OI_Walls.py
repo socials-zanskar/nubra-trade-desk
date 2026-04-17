@@ -107,7 +107,7 @@ st.markdown(
       <div class="nubra-kicker">Nubra index structure</div>
       <h1 class="nubra-desk-title">See the actual option shelves, not just the scanner label</h1>
       <p class="nubra-desk-copy">
-        OI Walls is one of the clearest Nubra showcase surfaces. It takes raw option-chain data, draws the real call-versus-put shelves, and then overlays the dominant scanner wall so the market structure becomes visual instead of abstract.
+        Raw index ladders with the dominant scanner wall overlaid on top.
       </p>
     </div>
     """,
@@ -141,7 +141,7 @@ for chain_snapshot in chain_snapshots:
           <div class="nubra-kicker">{chain_snapshot.symbol}</div>
           <h2 class="nubra-desk-title" style="font-size:1.55rem;">Current-expiry ladder</h2>
           <p class="nubra-desk-copy" style="max-width:none;">
-            Expiry {chain_snapshot.expiry or 'N/A'} | Spot {chain_snapshot.spot:,.2f} | Dominant wall {wall_signal.wall_type if wall_signal else 'N/A'} {wall_signal.wall_strike if wall_signal and wall_signal.wall_strike is not None else 'N/A'}
+            Expiry {chain_snapshot.expiry or 'N/A'} | Spot {chain_snapshot.spot:,.2f} | Wall {wall_signal.wall_type if wall_signal else 'N/A'} {wall_signal.wall_strike if wall_signal and wall_signal.wall_strike is not None else 'N/A'}
           </p>
         </div>
         """,
@@ -157,11 +157,6 @@ for chain_snapshot in chain_snapshots:
     with left:
         section_header("Desk read", "What the ladder is saying right now.")
         callout(chain_snapshot.symbol, _wall_summary(chain_snapshot, wall_signal))
-        if wall_signal:
-            callout(
-                "Why this matters",
-                f"The dominant {wall_signal.wall_type or 'N/A'} wall is the scanner's cleanest nearby shelf. Use the ladder to judge whether it is isolated or supported by surrounding strikes.",
-            )
 
     with right:
         section_header("Selected ladder rows", "The raw ladder values behind the chart.")

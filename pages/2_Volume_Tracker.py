@@ -60,7 +60,7 @@ if snapshot.get("is_post_close") and eod_summary:
           <div class="nubra-kicker">Close participation</div>
           <h1 class="nubra-desk-title">Who actually commanded attention by the bell</h1>
           <p class="nubra-desk-copy">
-            After the session ends, Volume Tracker becomes a stored participation board. This is the clean read on which names actually held unusual involvement into the close.
+            Stored participation board for the names that still held unusual involvement into the close.
           </p>
         </div>
         """,
@@ -123,7 +123,7 @@ st.markdown(
       <div class="nubra-kicker">Discovery layer</div>
       <h1 class="nubra-desk-title">Find where participation is changing fastest</h1>
       <p class="nubra-desk-copy">
-        Volume Tracker is the raw discovery surface. Its job is not to declare breakouts. Its job is to show where participation is becoming abnormal so stronger names can move into quality and structure review.
+        Discovery surface for abnormal participation before names move into stricter review.
       </p>
     </div>
     """,
@@ -176,17 +176,13 @@ with left:
         callout("No symbols match the filter", "Lower the ratio threshold or turn off the 2x-only toggle.")
 
 with right:
-    section_header("What to do with this", "Use it as discovery, not as a final verdict.")
+    section_header("Current lead", "Strongest filtered participation.")
     if filtered_rows:
         lead = filtered_rows[0]
         callout(
             f"Lead candidate | {lead.symbol}",
             f"Participation is running at {(lead.volume_ratio or 0.0):.2f}x versus baseline, with current traded volume at {(lead.current_volume or 0.0):,.0f}.",
         )
-    callout(
-        "Next step",
-        "Use this page to reduce the universe. The names that survive here should move into Breakout Confirmation or Symbol Drilldown.",
-    )
 
 left, right = st.columns([1.1, 0.9], gap="large")
 with left:
@@ -209,10 +205,6 @@ with right:
         {"bucket": "Below 1x", "count": len([row for row in volume_rows if (row.volume_ratio or 0.0) < 1.0])},
     ]
     st.dataframe(pd.DataFrame(bucket_rows), width="stretch", hide_index=True)
-    callout(
-        "Desk read",
-        "If the board is dominated by the 1x to 2x bucket, the scanner is still in discovery mode rather than conviction mode.",
-    )
 
 section_header("Scanner table", "Dense output for the active filter.")
 dataframe_card(

@@ -94,7 +94,7 @@ if snapshot.get("is_post_close") and eod_summary:
           <div class="nubra-kicker">Close context</div>
           <h1 class="nubra-desk-title">What actually held into the bell</h1>
           <p class="nubra-desk-copy">
-            This is the stored close board: the names that stayed strong, the participation that mattered, and the final index pressure framing the session.
+            Stored close board for the names and index pressure that held into the bell.
           </p>
         </div>
         """,
@@ -154,7 +154,7 @@ st.markdown(
       <div class="nubra-kicker">Decision board</div>
       <h1 class="nubra-desk-title">Read the market in one pass</h1>
       <p class="nubra-desk-copy">
-        Market Pulse is the front board. It should tell you which names deserve more time, which are only warming up, and whether index pressure makes the board cleaner or riskier.
+        Front board for the names worth time right now and the index pressure around them.
       </p>
     </div>
     """,
@@ -213,11 +213,6 @@ with right:
             )
     else:
         callout("No index context yet", "Once OI wall rows are available, this panel becomes the market backdrop.")
-
-    callout(
-        "How to use this page",
-        "Promote only the clearest names into drilldown. If a symbol is weak here, it probably does not deserve deeper work yet.",
-    )
 
 section_header("Ranked board", "Full ordering for the current universe.")
 dataframe_card(

@@ -20,7 +20,6 @@ PAGES = [
     ("OI Walls", "pages/3_OI_Walls.py"),
     ("Multi-Wall Explorer", "pages/5_Multi_Wall_Explorer.py"),
     ("Symbol Drilldown", "pages/6_Symbol_Drilldown.py"),
-    ("Watchlist + Alerts", "pages/7_Watchlist_Alerts.py"),
 ]
 
 NAV_LINKS = [
@@ -31,7 +30,6 @@ NAV_LINKS = [
     ("OI Walls", "/OI_Walls"),
     ("Multi-Wall Explorer", "/Multi_Wall_Explorer"),
     ("Symbol Drilldown", "/Symbol_Drilldown"),
-    ("Watchlist + Alerts", "/Watchlist_Alerts"),
 ]
 
 
@@ -71,28 +69,8 @@ def render_sidebar() -> None:
     )
 
     st.markdown('<div class="nubra-topbar-spacer"></div>', unsafe_allow_html=True)
-    st.markdown(
-        """
-        <div class="nubra-shell-intro">
-          <div>
-            <div class="nubra-kicker">Reference desk</div>
-            <div class="nubra-shell-title">Choose the market slice, then follow the signal stack.</div>
-            <div class="nubra-shell-copy">
-              This shell is the product layer above Nubra's scanners. It should feel like one coordinated workspace for discovery, confirmation, and options-structure reads, not a bundle of unrelated pages.
-            </div>
-          </div>
-          <div class="nubra-shell-badges">
-            <span class="nubra-chip tone-cyan">Volume breakout</span>
-            <span class="nubra-chip tone-blue">Market pulse</span>
-            <span class="nubra-chip tone-purple">OI structure</span>
-            <span class="nubra-chip tone-amber">Decision workflow</span>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
-    controls = st.columns([0.18, 0.35, 0.11, 0.16, 0.2], gap="small")
+    controls = st.columns([0.2, 0.46, 0.34], gap="small")
     with controls[0]:
         st.caption("UNIVERSE")
         selected_basket = st.selectbox(
@@ -103,7 +81,7 @@ def render_sidebar() -> None:
             help="This changes the symbol set used by the stock-signal pages.",
         )
     with controls[1]:
-        st.caption("SYMBOL SET")
+        st.caption("SYMBOLS")
         if selected_basket == "Custom":
             selected_custom = st.multiselect(
                 "Custom symbols",
@@ -124,11 +102,13 @@ def render_sidebar() -> None:
             combined_custom.extend(item.strip().upper() for item in manual_symbols.split(",") if item.strip())
             custom_symbols = ",".join(dict.fromkeys(combined_custom))
         else:
-            st.text_input(
-                "Custom symbols",
-                value="Switch to Custom to choose symbols",
-                disabled=True,
-                label_visibility="collapsed",
+            st.markdown(
+                """
+                <div class="nubra-control-note">
+                  Symbol picking is available only in <strong>Custom</strong> mode.
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
 
     selected_symbols = resolve_symbols_for_basket(selected_basket, custom_symbols)
@@ -137,34 +117,16 @@ def render_sidebar() -> None:
     st.session_state["nubra_selected_symbols"] = selected_symbols
 
     with controls[2]:
-        st.caption("COVERAGE")
-        st.markdown(
-            f"""
-            <div class="nubra-inline-metric">
-              <strong>{len(selected_symbols)}</strong>
-              <span>In play</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with controls[3]:
-        st.caption("FOCUS")
-        st.markdown(
-            f"""
-            <div class="nubra-inline-metric">
-              <strong>{selected_basket}</strong>
-              <span>Current universe</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with controls[4]:
-        st.caption("PREVIEW")
+        st.caption("DESK SUMMARY")
         symbol_preview = ", ".join(selected_symbols[:3]) if selected_symbols else "No symbols"
-        more = f"+{len(selected_symbols) - 3} more" if len(selected_symbols) > 3 else "Sample symbols"
+        more = f"+{len(selected_symbols) - 3} more" if len(selected_symbols) > 3 else "Focused set"
         st.markdown(
             f"""
-            <div class="nubra-inline-metric">
+            <div class="nubra-control-summary">
+              <div class="nubra-control-summary-top">
+                <span class="nubra-chip tone-cyan">{len(selected_symbols)} names</span>
+                <span class="nubra-chip tone-blue">{selected_basket}</span>
+              </div>
               <strong>{symbol_preview}</strong>
               <span>{more}</span>
             </div>

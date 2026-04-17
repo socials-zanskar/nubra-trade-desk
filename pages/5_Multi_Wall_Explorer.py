@@ -90,7 +90,7 @@ st.markdown(
       <div class="nubra-kicker">Structure explorer</div>
       <h1 class="nubra-desk-title">See whether nearby interest is stacked into one shelf or layered across many</h1>
       <p class="nubra-desk-copy">
-        Multi-Wall Explorer is the deeper options-structure read. It takes the scanner's highlighted candidate strikes and paints them directly onto the ladder so users can see concentration versus spread at a glance.
+        Highlighted candidate strikes painted directly onto the ladder.
       </p>
     </div>
     """,
@@ -153,24 +153,17 @@ with left:
     )
 
 with right:
-    section_header("Desk interpretation", "Why this page earns its place.")
+    section_header("Structure read", "Interpret the highlighted strikes against the full ladder.")
     callout(
-        "Structure read",
+        "Current structure",
         (
             f"{selected_symbol or 'Index'} currently has {len(symbol_rows)} highlighted candidate strikes. "
             f"The dominant scanner wall is {dominant.wall_type if dominant and dominant.wall_type else 'N/A'} "
             f"at {dominant.wall_strike if dominant and dominant.wall_strike is not None else 'N/A'}."
         ),
     )
-    if selected_symbol and selected_symbol in chain_map:
-        callout(
-            "Use case",
-            "Use this page when users want to know whether nearby option interest is concentrated into one shelf or layered across multiple strikes around spot.",
-        )
-        callout(
-            "Interpretive question",
-            "A tight concentration supports a cleaner wall read. A broad spread means the structure is there, but less concentrated than the headline wall alone suggests.",
-        )
+    if selected_symbol and selected_symbol in chain_map and selected:
+        callout("Selected wall", f"{selected[0].wall_side} side near {selected[0].strike:,.0f} is the closest resolved layer.")
 
 if used_cache:
     st.caption("Showing cached ladder data to keep the page responsive.")

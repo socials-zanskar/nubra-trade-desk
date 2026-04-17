@@ -13,7 +13,6 @@ if str(SRC) not in sys.path:
 
 from nubra_dash.bootstrap import load_local_env
 from nubra_dash.models import OIWallCandidate, WallSignal
-from nubra_dash.services import save_watchlist_symbols
 from nubra_dash.services.auth import load_auth_session
 from nubra_dash.services.market_history import fetch_historical_data, normalize_history_points
 from nubra_dash.ui.runtime import load_snapshot_with_feedback, render_refresh_bar
@@ -22,16 +21,6 @@ from nubra_dash.ui.theme import inject_css
 from nubra_dash.ui.widgets import callout, dataframe_card, metric_card, section_header
 
 load_local_env()
-
-
-def _persist_watchlist(config, symbol: str, fallback_symbols: tuple[str, ...]) -> tuple[str, ...]:
-    symbols = list(dict.fromkeys(item for item in fallback_symbols if item))
-    if symbol not in symbols:
-        symbols.append(symbol)
-    st.session_state["nubra_watchlist"] = ",".join(symbols)
-    save_watchlist_symbols(config, symbols)
-    return tuple(symbols)
-
 
 inject_css()
 render_sidebar()
@@ -49,7 +38,6 @@ snapshot, used_cache = load_snapshot_with_feedback(
 merged = tuple(snapshot["merged_signals"])
 candidate_symbols = [signal.symbol for signal in merged] or list(selected_symbols)
 drilldown_summaries = snapshot.get("drilldown_summaries", {})
-stored_watchlist = tuple(snapshot.get("watchlist_symbols", ()))
 default_focus = st.session_state.get("nubra_focus_symbol")
 if default_focus not in candidate_symbols:
     default_focus = candidate_symbols[0] if candidate_symbols else ""
@@ -74,10 +62,10 @@ if not symbol:
 st.markdown(
     """
     <div class="nubra-desk-hero">
-      <div class="nubra-kicker">Stored-first drilldown</div>
-      <h1 class="nubra-desk-title">Move from the board into one name without losing context</h1>
+      <div class="nubra-kicker">One-name decision page</div>
+      <h1 class="nubra-desk-title">Read one setup before you spend more time on it</h1>
       <p class="nubra-desk-copy">
-        Symbol Drilldown should feel like execution prep. Start with the worker-computed setup summary, then opt into live context only when the symbol has already earned more time.
+        Stored setup summary first, live detail only if the name has already earned more time.
       </p>
     </div>
     """,
@@ -94,16 +82,11 @@ with cols[2]:
 with cols[3]:
     metric_card("Confidence", f"{focus.confidence:.0f}" if focus else "N/A", "Worker-computed signal confidence.", accent="#22c55e")
 
-cta_cols = st.columns([0.18, 0.18, 0.64])
+cta_cols = st.columns([0.22, 0.78])
 with cta_cols[0]:
-    if symbol and st.button("Add to watchlist", width="stretch"):
-        updated_watchlist = _persist_watchlist(config, symbol, stored_watchlist)
-        snapshot["watchlist_symbols"] = updated_watchlist
-        st.success(f"{symbol} added to the session watchlist.")
-with cta_cols[1]:
     if symbol and live_detail_enabled and st.button("Load live detail", width="stretch"):
         st.session_state[live_detail_key] = True
-with cta_cols[2]:
+with cta_cols[1]:
     if focus:
         callout("Current read", focus.why_now or focus.signal_reason)
 
@@ -118,9 +101,9 @@ if symbol and st.session_state.get(live_detail_key):
     else:
         history_error = auth_session.error if auth_session else "Live drilldown session is unavailable."
 
-left, right = st.columns([1.2, 0.95], gap="large")
+left, right = st.columns([1.05, 0.95], gap="large")
 with left:
-    section_header("Price and volume context", "Live detail is optional; the stored summary comes first.")
+    section_header("Price and volume", "Use live detail only if the setup already deserves it.")
     if not history_frame.empty:
         price_frame = history_frame.set_index("timestamp")[["close"]]
         st.line_chart(price_frame, height=280)
@@ -135,15 +118,15 @@ with left:
             callout("Stored mode only", "Live drilldown is disabled. This page is reading worker-computed summaries from Supabase.")
 
 with right:
-    section_header("Desk interpretation", "This should already tell the story before any live fetch.")
-    notes = []
+    section_header("Decision read", "This should be enough to decide whether the setup deserves more work.")
     if focus:
-        notes.append(f"{focus.setup_type} | {focus.action_state} | confidence {focus.confidence:.0f}.")
-        notes.append(f"Primary read: {focus.why_now or focus.signal_reason}")
+        callout("Setup", f"{focus.setup_type} | {focus.action_state} | confidence {focus.confidence:.0f}")
+        callout("Primary read", focus.why_now or focus.signal_reason)
         if stored_drilldown and getattr(stored_drilldown, 'notes', None):
-            notes.extend(stored_drilldown.notes)
+            for note in stored_drilldown.notes[:3]:
+                callout(symbol or "Stored note", note)
         elif focus.volume_ratio is not None:
-            notes.append(f"Current candle participation is {focus.volume_ratio:.2f}x versus its baseline.")
+            callout("Participation", f"Current candle participation is {focus.volume_ratio:.2f}x versus baseline.")
         levels = []
         if focus.trigger_price is not None:
             levels.append(f"Trigger {focus.trigger_price:.2f}")
@@ -152,17 +135,16 @@ with right:
         if focus.first_target is not None:
             levels.append(f"Target {focus.first_target:.2f}")
         if levels:
-            notes.append(" | ".join(levels))
+            callout("Levels", " | ".join(levels))
         if index_rows:
-            notes.append(
+            callout(
+                "Index backdrop",
                 "Index context: "
                 + " | ".join(
                     f"{row.symbol} {row.wall_type or 'N/A'} wall {row.proximity_pct or 0.0:.2f}% away"
                     for row in index_rows
-                )
+                ),
             )
-    for note in notes:
-        callout(symbol or "Setup", note)
 
 section_header("Index wall ladder", "Current-expiry clustered strikes from NIFTY and SENSEX.")
 dataframe_card(

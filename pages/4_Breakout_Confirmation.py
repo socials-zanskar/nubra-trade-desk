@@ -71,7 +71,7 @@ st.markdown(
       <div class="nubra-kicker">Quality gate</div>
       <h1 class="nubra-desk-title">Separate noise from setups worth real attention</h1>
       <p class="nubra-desk-copy">
-        Breakout Confirmation is the filter between raw discovery and deeper work. It should reduce the board, not tell the whole story. High relative volume gets a symbol through the gate; price structure still decides whether it is tradeable.
+        Filter between discovery and drilldown. Volume gets a name through the gate; price still decides the trade.
       </p>
     </div>
     """,
@@ -103,15 +103,7 @@ with left:
         callout("No names cleared the filter", "Lower the floor if you want a wider shortlist.")
 
 with right:
-    section_header("What this page means", "Treat it as a gate, not a final verdict.")
-    callout(
-        "What passed",
-        "These names have enough abnormal participation to deserve more attention than the rest of the universe.",
-    )
-    callout(
-        "What is still missing",
-        "Actual breakout quality still depends on price acceptance, clean trigger levels, and whether the broader index backdrop supports the move.",
-    )
+    section_header("Current lead", "Strongest surviving name.")
     if confirmed:
         leader = confirmed[0]
         callout(
