@@ -160,7 +160,7 @@ def compact_table(data, *, use_container_width: bool = True, hide_index: bool = 
     frame = pd.DataFrame(data)
     st.dataframe(
         frame,
-        use_container_width=use_container_width,
+        width="stretch" if use_container_width else "content",
         hide_index=hide_index,
         height=min(460, 44 + len(frame) * 32) if not frame.empty else 168,
     )
@@ -168,7 +168,7 @@ def compact_table(data, *, use_container_width: bool = True, hide_index: bool = 
 
 def dataframe_card(data, *, use_container_width: bool = True, hide_index: bool = True) -> None:
     frame = pd.DataFrame(data)
-    st.dataframe(frame, use_container_width=use_container_width, hide_index=hide_index)
+    st.dataframe(frame, width="stretch" if use_container_width else "content", hide_index=hide_index)
 
 
 def _tone_class(tone: str) -> str:

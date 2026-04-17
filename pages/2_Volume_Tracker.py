@@ -21,9 +21,19 @@ from nubra_dash.ui.widgets import callout, dataframe_card, metric_card, section_
 load_local_env()
 
 
+def _scanner_note(row: VolumeSignal) -> str:
+    ratio = row.volume_ratio or 0.0
+    if ratio >= 3.0:
+        return "This is real participation. It deserves immediate validation against structure."
+    if ratio >= 2.0:
+        return "Strong abnormal volume. Keep it on the front board."
+    if ratio >= 1.2:
+        return "Interesting, but still more discovery than conviction."
+    return "Visible activity, not yet meaningful."
+
+
 inject_css()
 render_sidebar()
-st.markdown("## Volume Tracker")
 config = get_runtime_app_config()
 selected_symbols = get_selected_symbols()
 render_refresh_bar("volume_tracker", config, selected_symbols, live_auth=False, prefer_database=True)
@@ -43,13 +53,14 @@ top_ratio = max((row.volume_ratio or 0.0 for row in volume_rows), default=0.0)
 if snapshot.get("is_post_close") and eod_summary:
     summary = dict(eod_summary.get("summary") or {})
     leaders = tuple(eod_summary.get("leaders") or ())
+
     st.markdown(
         """
         <div class="nubra-desk-hero">
-          <div class="nubra-kicker">Today's volume</div>
-          <h1 class="nubra-desk-title">Participation into the close</h1>
+          <div class="nubra-kicker">Close participation</div>
+          <h1 class="nubra-desk-title">Who actually commanded attention by the bell</h1>
           <p class="nubra-desk-copy">
-            The session is over, so this page shifts from live scan mode into an end-of-day participation board. Use it to see which names truly commanded attention by the close.
+            After the session ends, Volume Tracker becomes a stored participation board. This is the clean read on which names actually held unusual involvement into the close.
           </p>
         </div>
         """,
@@ -58,28 +69,22 @@ if snapshot.get("is_post_close") and eod_summary:
 
     cols = st.columns(4)
     with cols[0]:
-        metric_card("Top symbol", str(summary.get("top_symbol") or "None"), "Highest-ranked stored leader.")
+        metric_card("Top symbol", str(summary.get("top_symbol") or "None"), "Strongest stored leader.")
     with cols[1]:
-        metric_card("Top ratio", f"{float(summary.get('top_volume_ratio') or 0.0):.2f}x", "Best abnormal participation captured today.", accent="#57b6ff")
+        metric_card("Top ratio", f"{float(summary.get('top_volume_ratio') or 0.0):.2f}x", "Best abnormal participation at the close.", accent="#4ea1ff")
     with cols[2]:
-        metric_card("Priority names", str(summary.get("priority_signals") or 0), "Names worth reviewing after the close.", accent="#f8b84e")
+        metric_card("Priority names", str(summary.get("priority_signals") or 0), "Names worth revisiting after the bell.", accent="#f5b342")
     with cols[3]:
-        metric_card("Stored leaders", str(len(leaders)), "Rows preserved for today's close board.", accent="#24c48e")
+        metric_card("Stored rows", str(len(leaders)), "Saved participation leaders for the session.", accent="#22c55e")
 
-    left, right = st.columns([1.15, 0.85], gap="large")
+    left, right = st.columns([1.2, 0.8], gap="large")
     with left:
-        section_header("Top participation today", "Best names from the final EOD board.")
+        section_header("Close participation board", "Best names from the final stored summary.")
         if leaders:
             leaderboard = pd.DataFrame(
-                [
-                    {
-                        "symbol": row.get("symbol"),
-                        "volume ratio": round(float(row.get("volume_ratio") or 0.0), 2),
-                    }
-                    for row in leaders[:10]
-                ]
-            )
-            st.bar_chart(leaderboard.set_index("symbol"), height=320)
+                [{"symbol": row.get("symbol"), "volume ratio": round(float(row.get("volume_ratio") or 0.0), 2)} for row in leaders[:10]]
+            ).set_index("symbol")
+            st.bar_chart(leaderboard, height=320)
             dataframe_card(
                 [
                     {
@@ -93,13 +98,13 @@ if snapshot.get("is_post_close") and eod_summary:
                 ]
             )
         else:
-            callout("No close leaders yet", "The post-close sync will populate today's participation board.")
+            callout("No close participation yet", "The post-close sync will populate this board.")
 
     with right:
-        section_header("Close read", "What the volume board says after the bell.")
+        section_header("Close read", "What the participation board says after the bell.")
         callout(
             "Strongest name",
-            f"{summary.get('top_symbol') or 'None'} printed the strongest stored ratio at {float(summary.get('top_volume_ratio') or 0.0):.2f}x.",
+            f"{summary.get('top_symbol') or 'None'} closed as the strongest participation name at {float(summary.get('top_volume_ratio') or 0.0):.2f}x.",
         )
         callout(
             "Index backdrop",
@@ -109,27 +114,27 @@ if snapshot.get("is_post_close") and eod_summary:
             callout("Why it mattered", str(summary.get("top_signal_reason")))
 
     if used_cache:
-        st.caption("Showing the latest stored close summary for faster response.")
+        st.caption("Showing the latest stored close summary for fast response.")
     st.stop()
 
 st.markdown(
     """
     <div class="nubra-desk-hero">
-      <div class="nubra-kicker">Scanner</div>
-      <h1 class="nubra-desk-title">Emerging participation</h1>
+      <div class="nubra-kicker">Discovery layer</div>
+      <h1 class="nubra-desk-title">Find where participation is changing fastest</h1>
       <p class="nubra-desk-copy">
-        Use this page as the raw scan console. The job here is not to make final decisions. It is to isolate where participation is actually changing so only the strongest names move forward.
+        Volume Tracker is the raw discovery surface. Its job is not to declare breakouts. Its job is to show where participation is becoming abnormal so stronger names can move into quality and structure review.
       </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-filters = st.columns([0.34, 0.26, 0.18, 0.22])
+filters = st.columns([0.34, 0.22, 0.18, 0.26], gap="small")
 with filters[0]:
     min_ratio = st.slider("Minimum volume ratio", min_value=0.0, max_value=max(3.0, round(top_ratio + 0.5, 1)), value=1.0, step=0.1)
 with filters[1]:
-    show_only_strong = st.toggle("Show only 2x+ spikes", value=False)
+    show_only_strong = st.toggle("Only 2x+ names", value=False)
 with filters[2]:
     max_rows = st.selectbox("Rows", options=[10, 15, 20, 30], index=1)
 with filters[3]:
@@ -143,75 +148,73 @@ if sort_mode == "Largest current volume":
 else:
     filtered_rows = sorted(filtered_rows, key=lambda row: row.volume_ratio or 0.0, reverse=True)[:max_rows]
 
+two_x_spikes = len([row for row in volume_rows if (row.volume_ratio or 0.0) >= 2.0])
+three_x_spikes = len([row for row in volume_rows if (row.volume_ratio or 0.0) >= 3.0])
+
 cols = st.columns(4)
 with cols[0]:
-    metric_card("Tracked", str(len(selected_symbols)), "Current basket size for the scan.")
+    metric_card("Tracked", str(len(selected_symbols)), "Current scan universe size.")
 with cols[1]:
-    metric_card("Best ratio", f"{top_ratio:.2f}x", "Highest abnormal participation in this snapshot.", accent="#57b6ff")
+    metric_card("Best ratio", f"{top_ratio:.2f}x", "Strongest abnormal participation in this snapshot.", accent="#4ea1ff")
 with cols[2]:
-    metric_card("2x+ spikes", str(len([row for row in volume_rows if (row.volume_ratio or 0.0) >= 2.0])), "Names currently above the stronger attention threshold.", accent="#f8b84e")
+    metric_card("2x+ spikes", str(two_x_spikes), "Names already demanding more attention.", accent="#f5b342")
 with cols[3]:
-    metric_card("Visible", str(len(filtered_rows)), "Rows left after filters.", accent="#24c48e")
+    metric_card("3x+ prints", str(three_x_spikes), "Names behaving like true outliers.", accent="#22c55e")
 
 if errors:
-    callout("Live data issue", " | ".join(str(error) for error in errors if error))
+    callout("Data issue", " | ".join(str(error) for error in errors if error))
 
-st.write("")
-lead_cols = st.columns([1.05, 0.95], gap="large")
-with lead_cols[0]:
-    section_header("Top scan hits", "Quick read on where participation is changing fastest.")
-    leaderboard = pd.DataFrame(
-        [
-            {
-                "symbol": row.symbol,
-                "volume ratio": round(row.volume_ratio or 0.0, 2),
-            }
-            for row in filtered_rows[:8]
-        ]
-    )
-    if not leaderboard.empty:
-        st.bar_chart(leaderboard.set_index("symbol"), height=280)
+left, right = st.columns([1.2, 0.8], gap="large")
+with left:
+    section_header("Top participation now", "The strongest scan hits after the active filter.")
+    if filtered_rows:
+        leaderboard = pd.DataFrame(
+            [{"symbol": row.symbol, "volume ratio": round(row.volume_ratio or 0.0, 2)} for row in filtered_rows[:8]]
+        ).set_index("symbol")
+        st.bar_chart(leaderboard, height=290)
     else:
-        callout("No symbols match the filter", "Try lowering the ratio threshold or turning off the 2x-only toggle.")
-with lead_cols[1]:
-    section_header("Scanner read", "What deserves the next click.")
+        callout("No symbols match the filter", "Lower the ratio threshold or turn off the 2x-only toggle.")
+
+with right:
+    section_header("What to do with this", "Use it as discovery, not as a final verdict.")
     if filtered_rows:
         lead = filtered_rows[0]
         callout(
             f"Lead candidate | {lead.symbol}",
-            f"Participation is running at {lead.volume_ratio or 0.0:.2f}x versus baseline, with current traded volume at {lead.current_volume or 0.0:,.0f}.",
+            f"Participation is running at {(lead.volume_ratio or 0.0):.2f}x versus baseline, with current traded volume at {(lead.current_volume or 0.0):,.0f}.",
         )
     callout(
-        "How to use it",
-        "Filter noise here first. The goal is to leave only the names worth validating elsewhere.",
+        "Next step",
+        "Use this page to reduce the universe. The names that survive here should move into Breakout Confirmation or Symbol Drilldown.",
     )
 
-left, right = st.columns([1.05, 1.05], gap="large")
+left, right = st.columns([1.1, 0.9], gap="large")
 with left:
-    section_header("Participation buckets", "Good scanners separate real movement from background activity.")
+    section_header("Forward list", "The names most worth escalating into setup review.")
+    if filtered_rows:
+        for row in filtered_rows[:6]:
+            callout(
+                f"{row.symbol} | {(row.volume_ratio or 0.0):.2f}x",
+                _scanner_note(row),
+            )
+    else:
+        callout("No candidates yet", "Once the filters allow rows through, the strongest names appear here.")
+
+with right:
+    section_header("Participation buckets", "How concentrated the scan really is.")
     bucket_rows = [
         {"bucket": "3x or higher", "count": len([row for row in volume_rows if (row.volume_ratio or 0.0) >= 3.0])},
         {"bucket": "2x to 3x", "count": len([row for row in volume_rows if 2.0 <= (row.volume_ratio or 0.0) < 3.0])},
         {"bucket": "1x to 2x", "count": len([row for row in volume_rows if 1.0 <= (row.volume_ratio or 0.0) < 2.0])},
         {"bucket": "Below 1x", "count": len([row for row in volume_rows if (row.volume_ratio or 0.0) < 1.0])},
     ]
-    st.dataframe(pd.DataFrame(bucket_rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(bucket_rows), width="stretch", hide_index=True)
     callout(
-        "Desk note",
-        "If most names are in the 1x to 2x bucket, your scanner is still in discovery mode and not yet in decision mode.",
+        "Desk read",
+        "If the board is dominated by the 1x to 2x bucket, the scanner is still in discovery mode rather than conviction mode.",
     )
 
-with right:
-    section_header("Forward list", "Names most worth pushing into setup validation.")
-    for row in filtered_rows[:4]:
-        callout(
-            row.symbol,
-            f"{row.volume_ratio or 0.0:.2f}x abnormal volume. Current traded volume {row.current_volume or 0.0:,.0f}.",
-        )
-    if not filtered_rows:
-        callout("No candidates yet", "Once the filters allow rows through, the strongest names appear here first.")
-
-section_header("Scanner table", "Dense scan output for the active filters.")
+section_header("Scanner table", "Dense output for the active filter.")
 dataframe_card(
     [
         {
@@ -225,6 +228,6 @@ dataframe_card(
         for row in filtered_rows
     ]
 )
-st.caption(f"Viewing scan universe: {st.session_state.get('nubra_selected_basket', config.scans.default_basket)}")
+
 if used_cache:
     st.caption("Showing cached snapshot data to keep the page responsive.")

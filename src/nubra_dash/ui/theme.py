@@ -5,17 +5,17 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Palette:
-    bg: str = "#08131f"
-    panel: str = "#10263a"
-    panel_alt: str = "#143149"
-    line: str = "#234a68"
-    text: str = "#e8f1f8"
-    muted: str = "#88a3bb"
-    cyan: str = "#2ed3b7"
-    blue: str = "#57b6ff"
-    amber: str = "#f8b84e"
-    red: str = "#ff6b6b"
-    green: str = "#24c48e"
+    bg: str = "#071018"
+    panel: str = "#0f1b2d"
+    panel_alt: str = "#122238"
+    line: str = "#1f3552"
+    text: str = "#e6edf6"
+    muted: str = "#8ea3bb"
+    cyan: str = "#2dd4bf"
+    blue: str = "#4ea1ff"
+    amber: str = "#f5b342"
+    red: str = "#ff5d73"
+    green: str = "#22c55e"
 
 
 PALETTE = Palette()
@@ -43,14 +43,14 @@ def inject_css() -> None:
 
           .stApp {{
             background:
-              radial-gradient(circle at top right, rgba(46, 211, 183, 0.12), transparent 32%),
-              radial-gradient(circle at bottom left, rgba(87, 182, 255, 0.10), transparent 28%),
-              linear-gradient(180deg, #08131f 0%, #0b1825 100%);
+              radial-gradient(circle at top right, rgba(78, 161, 255, 0.11), transparent 28%),
+              radial-gradient(circle at top left, rgba(45, 212, 191, 0.08), transparent 24%),
+              linear-gradient(180deg, #071018 0%, #0a1320 100%);
             color: var(--text);
           }}
 
           html, body, [class*="css"] {{
-            font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: "Segoe UI", "Aptos", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
           }}
 
           section.main > div {{
@@ -113,8 +113,8 @@ def inject_css() -> None:
           }}
 
           .nubra-card {{
-            background: rgba(16, 38, 58, 0.96);
-            border: 1px solid rgba(35, 74, 104, 0.95);
+            background: rgba(15, 27, 45, 0.97);
+            border: 1px solid rgba(31, 53, 82, 0.98);
             border-radius: 16px;
             padding: 14px 14px 12px 14px;
           }}
@@ -280,14 +280,14 @@ def inject_css() -> None:
             z-index: 999;
             backdrop-filter: blur(16px);
             background:
-              linear-gradient(180deg, rgba(8, 34, 53, 0.97), rgba(11, 57, 72, 0.93)),
-              radial-gradient(circle at top right, rgba(46, 211, 183, 0.18), transparent 24%);
-            border: 1px solid rgba(46, 211, 183, 0.42);
+              linear-gradient(180deg, rgba(8, 25, 43, 0.98), rgba(9, 21, 37, 0.96)),
+              radial-gradient(circle at top right, rgba(78, 161, 255, 0.12), transparent 22%);
+            border: 1px solid rgba(45, 212, 191, 0.26);
             border-radius: 12px;
             padding: 0.3rem 0.52rem 0.34rem 0.52rem;
             box-shadow:
               0 14px 28px rgba(2, 10, 18, 0.28),
-              0 0 0 1px rgba(87, 182, 255, 0.12);
+              0 0 0 1px rgba(78, 161, 255, 0.08);
           }}
 
           .nubra-topbar-brand {{
@@ -295,7 +295,7 @@ def inject_css() -> None:
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.24rem;
           }}
 
           .nubra-topbar-kicker {{
@@ -310,9 +310,17 @@ def inject_css() -> None:
           .nubra-topbar-title {{
             margin: 0;
             color: var(--text);
-            font-size: 0.8rem;
+            font-size: 0.88rem;
             font-weight: 800;
             letter-spacing: -0.02em;
+          }}
+
+          .nubra-topbar-meta {{
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
           }}
 
           .nubra-nav-hint {{
@@ -346,6 +354,39 @@ def inject_css() -> None:
             height: 2.85rem;
           }}
 
+          .nubra-shell-intro {{
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: flex-end;
+            margin: 0.15rem 0 0.85rem 0;
+            padding: 0.15rem 0 0.35rem 0;
+          }}
+
+          .nubra-shell-title {{
+            color: var(--text);
+            font-size: 1rem;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+          }}
+
+          .nubra-shell-copy {{
+            margin-top: 0.28rem;
+            color: var(--muted);
+            font-size: 0.78rem;
+            line-height: 1.45;
+            max-width: 54rem;
+          }}
+
+          .nubra-shell-badges {{
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            max-width: 26rem;
+          }}
+
           .nubra-nav-link {{
             display: inline-flex;
             justify-content: center;
@@ -353,8 +394,8 @@ def inject_css() -> None:
             min-height: 1.62rem;
             padding: 0.04rem 0.32rem;
             border-radius: 8px;
-            border: 1px solid rgba(87, 182, 255, 0.18);
-            background: linear-gradient(180deg, rgba(15, 42, 62, 0.96), rgba(10, 28, 45, 0.94));
+            border: 1px solid rgba(78, 161, 255, 0.16);
+            background: linear-gradient(180deg, rgba(16, 30, 49, 0.98), rgba(10, 20, 34, 0.96));
             color: var(--text) !important;
             text-decoration: none !important;
             font-weight: 700;
@@ -365,19 +406,11 @@ def inject_css() -> None:
           }}
 
           .nubra-nav-link:hover {{
-            border-color: rgba(46, 211, 183, 0.55);
-            background: linear-gradient(180deg, rgba(17, 66, 83, 0.98), rgba(12, 39, 56, 0.96));
-            color: var(--cyan) !important;
+            border-color: rgba(78, 161, 255, 0.42);
+            background: linear-gradient(180deg, rgba(18, 41, 65, 0.99), rgba(11, 26, 44, 0.98));
+            color: #d9f4ff !important;
             transform: translateY(-1px);
             box-shadow: 0 10px 22px rgba(2, 10, 18, 0.28);
-          }}
-
-          .nubra-toolbar {{
-            border-top: 1px solid rgba(255,255,255,0.05);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            background: rgba(255,255,255,0.01);
-            padding: 0.34rem 0;
-            margin-bottom: 0.6rem;
           }}
 
           .trader-strip {{
@@ -421,13 +454,80 @@ def inject_css() -> None:
             padding-top: 0.25rem;
           }}
 
+          .nubra-refresh-bar {{
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: center;
+            margin: 0.1rem 0 0.65rem 0;
+            padding: 0.45rem 0.15rem 0.55rem 0.15rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+          }}
+
+          .nubra-refresh-cluster {{
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            min-width: 0;
+          }}
+
+          .nubra-status-dot {{
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 999px;
+            background: linear-gradient(180deg, var(--cyan), var(--blue));
+            box-shadow: 0 0 16px rgba(45, 212, 191, 0.35);
+            flex: 0 0 auto;
+          }}
+
+          .nubra-refresh-strong {{
+            color: var(--text);
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+          }}
+
+          .nubra-refresh-chip {{
+            display: inline-flex;
+            align-items: center;
+            padding: 0.08rem 0.45rem;
+            border-radius: 999px;
+            border: 1px solid rgba(78, 161, 255, 0.18);
+            background: rgba(78, 161, 255, 0.08);
+            color: var(--blue);
+            font-size: 0.67rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+          }}
+
+          .nubra-refresh-meta {{
+            color: var(--muted);
+            font-size: 0.74rem;
+            font-weight: 600;
+          }}
+
+          .nubra-refresh-side {{
+            color: var(--muted);
+            font-size: 0.72rem;
+            text-align: right;
+            max-width: 28rem;
+            line-height: 1.35;
+          }}
+
           .nubra-inline-metric {{
             display: flex;
             flex-direction: column;
             justify-content: center;
-            min-height: 2.5rem;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            padding: 0.08rem 0;
+            min-height: 3.7rem;
+            border: 1px solid rgba(31, 53, 82, 0.9);
+            border-radius: 14px;
+            padding: 0.6rem 0.75rem;
+            background:
+              linear-gradient(180deg, rgba(15, 27, 45, 0.98), rgba(11, 22, 36, 0.96)),
+              radial-gradient(circle at top right, rgba(78, 161, 255, 0.08), transparent 28%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
           }}
 
           .nubra-inline-metric strong {{
@@ -441,6 +541,33 @@ def inject_css() -> None:
             color: var(--muted);
             font-size: 0.69rem;
             line-height: 1.25;
+          }}
+
+          div[data-testid="stSelectbox"] > div,
+          div[data-testid="stTextInput"] > div,
+          div[data-testid="stMultiSelect"] > div {{
+            border-radius: 14px;
+          }}
+
+          div[data-testid="stSelectbox"] [data-baseweb="select"] > div,
+          div[data-testid="stTextInput"] input,
+          div[data-testid="stMultiSelect"] [data-baseweb="select"] > div {{
+            background: rgba(17, 35, 57, 0.98) !important;
+            border: 1px solid rgba(31, 53, 82, 0.95) !important;
+            color: var(--text) !important;
+            border-radius: 14px !important;
+            min-height: 3rem !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+          }}
+
+          div[data-testid="stTextInput"] input::placeholder {{
+            color: rgba(142, 163, 187, 0.72);
+          }}
+
+          div[data-testid="stSelectbox"] label,
+          div[data-testid="stTextInput"] label,
+          div[data-testid="stMultiSelect"] label {{
+            color: var(--muted) !important;
           }}
 
           .nubra-metric-card,
@@ -590,6 +717,32 @@ def inject_css() -> None:
             line-height: 1.5;
           }}
 
+          div.stButton > button[kind="primary"] {{
+            background: linear-gradient(180deg, rgba(45, 212, 191, 0.96), rgba(24, 172, 153, 0.96));
+            color: #071018;
+            border: 1px solid rgba(45, 212, 191, 0.3);
+            font-weight: 800;
+            box-shadow: 0 8px 18px rgba(2, 10, 18, 0.22);
+          }}
+
+          div.stButton > button {{
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.02);
+            color: var(--text);
+          }}
+
+          div.stButton > button:hover {{
+            border-color: rgba(78, 161, 255, 0.34);
+            color: var(--text);
+          }}
+
+          div[data-testid="stDataFrame"] {{
+            border: 1px solid rgba(31, 53, 82, 0.98);
+            border-radius: 14px;
+            overflow: hidden;
+          }}
+
           @media (max-width: 1100px) {{
             .nubra-grid.cols-4,
             .nubra-grid.cols-3 {{
@@ -611,6 +764,26 @@ def inject_css() -> None:
 
             .nubra-topbar-spacer {{
               height: 5rem;
+            }}
+
+            .nubra-shell-intro {{
+              flex-direction: column;
+              align-items: flex-start;
+            }}
+
+            .nubra-shell-badges {{
+              justify-content: flex-start;
+              max-width: none;
+            }}
+
+            .nubra-refresh-bar {{
+              flex-direction: column;
+              align-items: flex-start;
+            }}
+
+            .nubra-refresh-side {{
+              text-align: left;
+              max-width: none;
             }}
           }}
         </style>

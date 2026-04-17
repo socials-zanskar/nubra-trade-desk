@@ -37,20 +37,31 @@ def _state_label(signal) -> str:
     return "Cold"
 
 
-def _pulse_note(signal) -> str:
+def _desk_note(signal) -> str:
     ratio = signal.volume_ratio or 0.0
     if ratio >= 2.0:
-        return "Strong enough to check against price structure and trigger levels now."
+        return "Participation is already strong enough to justify immediate structure review."
     if ratio >= 1.5:
-        return "Worth watching, but it still needs cleaner confirmation before execution prep."
+        return "This is worth keeping on the front board, but it still needs cleaner acceptance."
     if ratio >= 1.1:
-        return "Participation is improving, but not enough to force immediate attention."
-    return "Still more background than front-board."
+        return "There is movement here, but not enough urgency to crowd the front board."
+    return "This is visible, not decisive."
+
+
+def _index_context(index_rows: list[WallSignal]) -> list[dict[str, object]]:
+    return [
+        {
+            "index": row.symbol,
+            "bias": row.bias or "Neutral",
+            "wall": f"{row.wall_type or 'N/A'} {float(row.wall_strike or 0.0):.0f}",
+            "distance %": round(row.proximity_pct or 999.0, 2),
+        }
+        for row in index_rows
+    ]
 
 
 inject_css()
 render_sidebar()
-st.markdown("## Market Pulse")
 config = get_runtime_app_config()
 selected_symbols = get_selected_symbols()
 render_refresh_bar("market_pulse", config, selected_symbols, live_auth=False, prefer_database=True)
@@ -65,44 +76,45 @@ snapshot, used_cache = load_snapshot_with_feedback(
 merged = tuple(snapshot["merged_signals"])
 eod_summary = snapshot.get("eod_summary")
 top_signal = merged[0] if merged else None
-top_volume = max((signal.volume_ratio or 0.0 for signal in merged), default=0.0)
 index_rows = [row for row in snapshot["index_wall_batch"].rows if isinstance(row, WallSignal)]
-nearby_walls = sum(1 for row in index_rows if (row.proximity_pct or 999.0) <= 2.0)
-errors = snapshot["volume_batch"].errors + snapshot["index_wall_batch"].errors
 actionable = [signal for signal in merged if (signal.volume_ratio or 0.0) >= 1.5]
 build = [signal for signal in merged if 1.1 <= (signal.volume_ratio or 0.0) < 1.5]
 cooling = [signal for signal in merged if (signal.volume_ratio or 0.0) < 1.1]
+best_ratio = max((signal.volume_ratio or 0.0 for signal in merged), default=0.0)
+index_context = _index_context(index_rows)
+errors = snapshot["volume_batch"].errors + snapshot["index_wall_batch"].errors
 
 if snapshot.get("is_post_close") and eod_summary:
     summary = dict(eod_summary.get("summary") or {})
     leaders = tuple(eod_summary.get("leaders") or ())
+
     st.markdown(
         """
         <div class="nubra-desk-hero">
-          <div class="nubra-kicker">Today's market</div>
-          <h1 class="nubra-desk-title">Close pulse</h1>
+          <div class="nubra-kicker">Close context</div>
+          <h1 class="nubra-desk-title">What actually held into the bell</h1>
           <p class="nubra-desk-copy">
-            The market is closed. This board now prioritizes the best setups, the strongest participation, and the final index pressure that mattered into the close.
+            This is the stored close board: the names that stayed strong, the participation that mattered, and the final index pressure framing the session.
           </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
     cols = st.columns(4)
     with cols[0]:
-        metric_card("Top symbol", str(summary.get("top_symbol") or "None"), "Strongest stored leader at the close.")
+        metric_card("Top symbol", str(summary.get("top_symbol") or "None"), "Strongest stored leader.")
     with cols[1]:
-        metric_card("Priority names", str(summary.get("priority_signals") or 0), "Signals that held front-board quality.", accent="#57b6ff")
+        metric_card("Priority names", str(summary.get("priority_signals") or 0), "Setups that stayed worth revisiting.", accent="#4ea1ff")
     with cols[2]:
-        metric_card("Top ratio", f"{float(summary.get('top_volume_ratio') or 0.0):.2f}x", "Best participation print captured today.", accent="#f8b84e")
+        metric_card("Top ratio", f"{float(summary.get('top_volume_ratio') or 0.0):.2f}x", "Best close participation.", accent="#f5b342")
     with cols[3]:
-        metric_card("Index regime", str(summary.get("nifty_bias") or "Mixed"), "NIFTY close context anchors the board.", accent="#24c48e")
+        metric_card("NIFTY bias", str(summary.get("nifty_bias") or "Mixed"), "Close backdrop.", accent="#22c55e")
 
-    left, right = st.columns([1.15, 0.85], gap="large")
+    left, right = st.columns([1.2, 0.8], gap="large")
     with left:
-        section_header("Today's strongest names", "Best candidates from the final stored summary.")
-        top_rows = list(leaders[:8])
-        if top_rows:
+        section_header("Close board", "Best names from the final stored summary.")
+        if leaders:
             dataframe_card(
                 [
                     {
@@ -113,14 +125,14 @@ if snapshot.get("is_post_close") and eod_summary:
                         "volume ratio": round(float(row.get("volume_ratio") or 0.0), 2),
                         "reason": row.get("signal_reason"),
                     }
-                    for row in top_rows
+                    for row in leaders[:10]
                 ]
             )
         else:
-            callout("No EOD leaders yet", "Run the post-close sync once to populate today's close board.")
+            callout("No close board yet", "Run the post-close sync once to populate this view.")
 
     with right:
-        section_header("Index close context", "Final options pressure that framed the session.")
+        section_header("Index close context", "Final options pressure framing the day.")
         callout(
             "NIFTY",
             f"{summary.get('nifty_bias') or 'No saved bias'} | {summary.get('nifty_wall_type') or 'N/A'} wall at {float(summary.get('nifty_wall_strike') or 0.0):.0f}",
@@ -133,101 +145,79 @@ if snapshot.get("is_post_close") and eod_summary:
             callout("Desk takeaway", str(summary.get("top_signal_reason")))
 
     if used_cache:
-        st.caption("Showing the latest stored close summary for faster response.")
+        st.caption("Showing the latest stored close summary for fast response.")
     st.stop()
 
 st.markdown(
     """
     <div class="nubra-desk-hero">
-      <div class="nubra-kicker">Trading Desk</div>
-      <h1 class="nubra-desk-title">Actionable board</h1>
+      <div class="nubra-kicker">Decision board</div>
+      <h1 class="nubra-desk-title">Read the market in one pass</h1>
       <p class="nubra-desk-copy">
-        Start here when you want the shortest path from broad scan to names worth deeper work. This page should help you decide what earns attention now, what needs more confirmation, and what is only background noise.
+        Market Pulse is the front board. It should tell you which names deserve more time, which are only warming up, and whether index pressure makes the board cleaner or riskier.
       </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-lead_cols = st.columns([1.15, 0.85], gap="large")
-with lead_cols[0]:
-    section_header("Actionable now", "Strongest names first.")
-    spotlight = pd.DataFrame(
-        [
-            {
-                "symbol": signal.symbol,
-                "state": _state_label(signal),
-                "volume ratio": round(signal.volume_ratio or 0.0, 2),
-            }
-            for signal in (actionable[:6] if actionable else merged[:6])
-        ]
-    )
-    if not spotlight.empty:
-        st.bar_chart(spotlight.set_index("symbol")[["volume ratio"]], height=260)
+metric_cols = st.columns(4)
+with metric_cols[0]:
+    metric_card("Actionable", str(len(actionable)), "Names closest to a real decision.")
+with metric_cols[1]:
+    metric_card("Building", str(len(build)), "Still interesting, not yet clean.", accent="#4ea1ff")
+with metric_cols[2]:
+    metric_card("Best ratio", f"{best_ratio:.2f}x", "Strongest participation on the board.", accent="#f5b342")
+with metric_cols[3]:
+    metric_card("Index layers", str(len(index_rows)), "Nearby regime inputs in play.", accent="#22c55e")
+
+if errors:
+    callout("Data issue", " | ".join(str(error) for error in errors if error))
+
+left, right = st.columns([1.25, 0.75], gap="large")
+with left:
+    section_header("Front board", "The shortest useful list right now.")
+    shortlist = list(actionable[:6] if actionable else merged[:6])
+    if shortlist:
+        chart_frame = pd.DataFrame(
+            [{"symbol": signal.symbol, "volume ratio": round(signal.volume_ratio or 0.0, 2)} for signal in shortlist]
+        ).set_index("symbol")
+        st.bar_chart(chart_frame, height=280)
+        st.write("")
+        for signal in shortlist:
+            row_cols = st.columns([0.84, 0.16], gap="small")
+            with row_cols[0]:
+                callout(
+                    f"{signal.symbol} | {_state_label(signal)} | {(signal.volume_ratio or 0.0):.2f}x",
+                    _desk_note(signal),
+                )
+            with row_cols[1]:
+                st.write("")
+                if st.button("Open", key=f"pulse_open_{signal.symbol}", width="stretch"):
+                    _open_drilldown(signal.symbol)
     else:
-        callout("No shortlist yet", "No names are standing out in the current snapshot.")
-with lead_cols[1]:
-    section_header("Desk read", "Keep the board tight.")
-    callout(
-        "Use this board",
-        "Push only the clearest names into drilldown. If the symbol is not strong here, it probably does not deserve more screen time yet.",
-    )
+        callout("No active board", "No symbols are standing out in the current snapshot.")
+
+with right:
+    section_header("Market backdrop", "Index pressure before symbol conviction.")
     if top_signal:
         callout(
             "Current leader",
-            f"{top_signal.symbol} is leading with {top_signal.volume_ratio or 0.0:.2f}x participation.",
+            f"{top_signal.symbol} leads the board at {(top_signal.volume_ratio or 0.0):.2f}x relative volume.",
         )
-
-cols = st.columns(4)
-with cols[0]:
-    metric_card("Actionable", str(len(actionable)), "Names closest to deserving a real decision.")
-with cols[1]:
-    metric_card("Building", str(len(build)), f"Best ratio on the board: {top_volume:.2f}x", accent="#57b6ff")
-with cols[2]:
-    metric_card("Regime risk", str(nearby_walls), "Index walls close enough to matter to broad market tone.", accent="#f8b84e")
-with cols[3]:
-    metric_card("Cooling", str(len(cooling)), "Names still visible but not forcing attention.", accent="#24c48e")
-
-if errors:
-    callout("Live data issue", " | ".join(str(error) for error in errors if error))
-
-left, right = st.columns([1.25, 0.9], gap="large")
-with left:
-    section_header("Decision shortlist", "Only the front-board names belong here.")
-    top_rows = list(actionable[:6] if actionable else merged[:6])
-    if top_rows:
-        for signal in top_rows:
-            detail_cols = st.columns([0.86, 0.14])
-            with detail_cols[0]:
-                callout(
-                    f"{signal.symbol}  |  {_state_label(signal)}",
-                    f"Volume {signal.volume_ratio or 0.0:.2f}x. {_pulse_note(signal)}",
-                )
-            with detail_cols[1]:
-                st.write("")
-                if st.button("Drill down", key=f"pulse_open_{signal.symbol}", use_container_width=True):
-                    _open_drilldown(signal.symbol)
+    if index_context:
+        for row in index_context:
+            callout(
+                row["index"],
+                f"{row['bias']} | {row['wall']} | {row['distance %']:.2f}% away",
+            )
     else:
-        callout("No merged signals yet", "This snapshot did not produce a decision shortlist.")
+        callout("No index context yet", "Once OI wall rows are available, this panel becomes the market backdrop.")
 
-with right:
-    section_header("Regime filter", "Read the shortlist against index pressure before escalating any symbol.")
-    pressure_rows = [
-        {
-            "Index": row.symbol,
-            "Wall type": row.wall_type,
-            "Wall strike": round(row.wall_strike or 0.0, 0),
-            "Distance from current price (%)": round(row.proximity_pct or 999.0, 2),
-            "Bias": row.bias,
-        }
-        for row in index_rows
-    ]
-    if pressure_rows:
-        pressure_frame = pd.DataFrame(pressure_rows).set_index("Index")
-        st.bar_chart(pressure_frame[["Distance from current price (%)"]], height=220)
-        st.dataframe(pressure_frame, use_container_width=True, height=225)
-    else:
-        callout("No index context yet", "Once the OI scan yields rows, this panel shows NIFTY and SENSEX current-expiry pressure.")
+    callout(
+        "How to use this page",
+        "Promote only the clearest names into drilldown. If a symbol is weak here, it probably does not deserve deeper work yet.",
+    )
 
 section_header("Ranked board", "Full ordering for the current universe.")
 dataframe_card(
@@ -236,11 +226,11 @@ dataframe_card(
             "symbol": signal.symbol,
             "state": _state_label(signal),
             "volume ratio": round(signal.volume_ratio or 0.0, 2),
-            "decision note": _pulse_note(signal),
+            "decision note": _desk_note(signal),
         }
         for signal in merged
     ]
 )
-st.caption(f"Viewing scan universe: {st.session_state.get('nubra_selected_basket', config.scans.default_basket)}")
+
 if used_cache:
     st.caption("Showing cached snapshot data to keep the page responsive.")

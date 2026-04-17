@@ -44,10 +44,10 @@ def render_mission_control_home(
     st.markdown(
         f"""
         <div class="nubra-desk-hero">
-          <div class="nubra-kicker">Trading Desk</div>
-          <h1 class="nubra-desk-title">What matters now</h1>
+          <div class="nubra-kicker">Mission control</div>
+          <h1 class="nubra-desk-title">Read the desk before you read individual names</h1>
           <p class="nubra-desk-copy">
-            Focus the open on the cleanest setups, read them against index pressure, and only escalate to deeper work when the board still looks tradable.
+            Home should answer three questions fast: where attention belongs, how strong participation really is, and whether index structure is making the board cleaner or more dangerous.
           </p>
           <p class="nubra-subtle nubra-mission-copy">
             <span class="nubra-chip tone-cyan">{len(selected_symbols)} names</span>
@@ -76,7 +76,7 @@ def render_mission_control_home(
     left_col, center_col, right_col = st.columns([0.28, 0.46, 0.26], gap="large")
 
     with left_col:
-        st.markdown(_rail_header("Actionable now", "Best-ranked names"), unsafe_allow_html=True)
+        st.markdown(_rail_header("Front board", "Best-ranked names right now"), unsafe_allow_html=True)
         priority_rows = actionables[:5] if actionables else merged[:5]
         if priority_rows:
             for idx, signal in enumerate(priority_rows, start=1):
@@ -90,18 +90,18 @@ def render_mission_control_home(
             callout("No setups", "No symbols cleared the current filters.")
 
     with center_col:
-        st.markdown(_panel_header("Ranked decision board", "Scan speed over narration"), unsafe_allow_html=True)
+        st.markdown(_panel_header("Signal board", "Fast ranking, minimal narration"), unsafe_allow_html=True)
         if merged:
-            st.plotly_chart(_build_momentum_figure(list(merged[:8])), use_container_width=True, theme=None)
+            st.plotly_chart(_build_momentum_figure(list(merged[:8])), width="stretch", theme=None)
         else:
             callout("No chart", "No current signal momentum rows.")
 
         st.write("")
-        st.markdown(_panel_header("Fast board", "Top names in one glance"), unsafe_allow_html=True)
+        st.markdown(_panel_header("Quick table", "Top names in one glance"), unsafe_allow_html=True)
         compact_table(_top_signal_rows(merged[:10]))
 
     with right_col:
-        st.markdown(_rail_header("Regime filter", "Index pressure and fresh changes"), unsafe_allow_html=True)
+        st.markdown(_rail_header("Backdrop", "Index pressure and fresh changes"), unsafe_allow_html=True)
         if index_rows:
             for row in index_rows[:2]:
                 _event_card(
@@ -149,7 +149,7 @@ def _render_eod_mission_control(
     st.markdown(
         f"""
         <div class="nubra-desk-hero">
-          <div class="nubra-kicker">Today's market</div>
+          <div class="nubra-kicker">Close summary</div>
           <h1 class="nubra-desk-title">Close summary</h1>
           <p class="nubra-subtle nubra-mission-copy">
             <span class="nubra-chip tone-blue">{len(selected_symbols)} names tracked</span>
@@ -190,11 +190,11 @@ def _render_eod_mission_control(
             callout("No leaders saved", "The post-close summary will populate here once an EOD sync completes.")
 
     with center_col:
-        st.markdown(_panel_header("Signal momentum", "Top setups at the close"), unsafe_allow_html=True)
+        st.markdown(_panel_header("Close board", "Top setups at the bell"), unsafe_allow_html=True)
         if leaders:
-            st.plotly_chart(_build_eod_momentum_figure(leaders[:8]), use_container_width=True, theme=None)
+            st.plotly_chart(_build_eod_momentum_figure(leaders[:8]), width="stretch", theme=None)
             st.write("")
-            st.markdown(_panel_header("Priority board", "Clean summary of today's strongest names"), unsafe_allow_html=True)
+            st.markdown(_panel_header("Priority table", "Clean summary of today's strongest names"), unsafe_allow_html=True)
             compact_table(_top_eod_rows(leaders[:10]))
         else:
             callout("No close board", "No leaders were stored for the current trading day.")

@@ -102,24 +102,32 @@ def render_refresh_bar(
             prefer_database=prefer_database,
         )
     )
-    generated_at = cached["snapshot"].get("generated_at") if cached and cached.get("snapshot") else None
-    data_source = cached["snapshot"].get("data_source") if cached and cached.get("snapshot") else None
-    last_updated = generated_at.strftime("%d %b %I:%M %p") if isinstance(generated_at, datetime) else "Waiting for first refresh"
-    freshness = _format_snapshot_age(generated_at) if isinstance(generated_at, datetime) else "No snapshot yet"
-    status_label = _resolve_status_label(data_source=data_source, live_auth=live_auth, generated_at=generated_at)
+    snapshot = cached.get("snapshot") if cached else None
+    generated_at = snapshot.get("generated_at") if snapshot else None
+    data_source = snapshot.get("data_source") if snapshot else None
+    data_present = _snapshot_has_visible_data(snapshot)
+    last_updated = generated_at.strftime("%d %b %I:%M %p") if isinstance(generated_at, datetime) else ("Ready in session" if data_present else "Waiting for refresh")
+    freshness = _format_snapshot_age(generated_at) if isinstance(generated_at, datetime) else ("Session view" if data_present else "No snapshot yet")
+    status_label = _resolve_status_label(
+        data_source=data_source,
+        live_auth=live_auth,
+        generated_at=generated_at,
+        data_present=data_present,
+    )
+    mode_label = "Live" if data_source == "live" else "Stored"
 
     st.markdown(
         f"""
-        <div class="nubra-toolbar trader-strip">
-          <div class="nubra-toolbar-row">
-            <span class="nubra-toolbar-label">Status</span>
-            <strong>{status_label}</strong>
-            <span class="nubra-toolbar-sep"></span>
-            <span class="nubra-toolbar-label">Snapshot age</span>
-            <strong>{freshness}</strong>
-            <span class="nubra-toolbar-sep"></span>
-            <span class="nubra-toolbar-label">Updated</span>
-            <strong>{last_updated}</strong>
+        <div class="nubra-refresh-bar trader-strip">
+          <div class="nubra-refresh-cluster">
+            <span class="nubra-status-dot"></span>
+            <span class="nubra-refresh-strong">{status_label}</span>
+            <span class="nubra-refresh-chip">{mode_label}</span>
+            <span class="nubra-refresh-meta">Age {freshness}</span>
+            <span class="nubra-refresh-meta">Updated {last_updated}</span>
+          </div>
+          <div class="nubra-refresh-side">
+            Reload fetches the latest shared view. Upstream refresh is admin-only.
           </div>
         </div>
         """,
@@ -132,23 +140,23 @@ def render_refresh_bar(
     else:
         left, middle, right = st.columns([0.13, 0.52, 0.35], gap="small")
     with left:
-        if st.button("Reload", key=f"{page_key}_reload", use_container_width=True, type="primary"):
+        if st.button("Reload", key=f"{page_key}_reload", width="stretch", type="primary"):
             clear_snapshot_cache(config, chosen_symbols, live_auth=live_auth, prefer_database=prefer_database)
             st.rerun()
     if admin_refresh_enabled:
         with admin_col:
-            if st.button("Refresh upstream", key=f"{page_key}_upstream_refresh", use_container_width=True):
+            if st.button("Refresh upstream", key=f"{page_key}_upstream_refresh", width="stretch"):
                 clear_snapshot_cache(config, chosen_symbols, live_auth=False, prefer_database=True)
                 with st.spinner("Running admin snapshot refresh..."):
                     refresh_database_snapshot(config, chosen_symbols)
                 st.rerun()
     with middle:
         st.markdown(
-            '<div class="nubra-inline-note">Reload refreshes this page from the latest stored snapshot. It does not hit Nubra unless an admin explicitly runs an upstream refresh.</div>',
+            '<div class="nubra-inline-note">Use Reload when you want the newest stored snapshot without waiting for a full page session reset.</div>',
             unsafe_allow_html=True,
         )
     with right:
-        right_note = "Stored mode keeps scans fast. Live pages add richer chart and option context where needed."
+        right_note = "Stored mode is the default product path: fast, shared, and stable."
         if admin_refresh_enabled:
             right_note = "Admin upstream refresh writes a new shared snapshot for everyone. Most users should stay on stored mode."
         st.markdown(
@@ -195,11 +203,28 @@ def _format_snapshot_age(generated_at: datetime) -> str:
     return f"{hours}h {minutes}m ago"
 
 
-def _resolve_status_label(*, data_source: str | None, live_auth: bool, generated_at: datetime | None) -> str:
+def _resolve_status_label(
+    *,
+    data_source: str | None,
+    live_auth: bool,
+    generated_at: datetime | None,
+    data_present: bool,
+) -> str:
     if generated_at is None:
-        return "Sync pending"
+        return "Session view ready" if data_present else "Sync pending"
     if data_source == "live":
         return "Live context"
     if live_auth:
         return "Snapshot + live context"
     return "Stored snapshot"
+
+
+def _snapshot_has_visible_data(snapshot: dict[str, object] | None) -> bool:
+    if not snapshot:
+        return False
+    merged = tuple(snapshot.get("merged_signals") or ())
+    volume_rows = tuple(getattr(snapshot.get("volume_batch"), "rows", ()) or ())
+    wall_rows = tuple(getattr(snapshot.get("index_wall_batch"), "rows", ()) or ())
+    eod = snapshot.get("eod_summary") or {}
+    leaders = tuple(eod.get("leaders") or ()) if isinstance(eod, dict) else ()
+    return bool(merged or volume_rows or wall_rows or leaders)

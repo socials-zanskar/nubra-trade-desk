@@ -28,16 +28,24 @@ def _open_drilldown(symbol: str) -> None:
 
 def _confirmation_state(signal, ratio_floor: float) -> str:
     ratio = signal.volume_ratio or 0.0
-    if ratio >= max(2.0, ratio_floor + 0.2):
+    if ratio >= max(2.0, ratio_floor + 0.35):
         return "Near actionable"
     if ratio >= ratio_floor:
         return "Needs trigger"
-    return "Filtered out"
+    return "Filtered"
+
+
+def _decision_note(signal, ratio_floor: float) -> str:
+    ratio = signal.volume_ratio or 0.0
+    if ratio >= max(2.0, ratio_floor + 0.35):
+        return "Participation is strong enough that price structure is the only remaining gate."
+    if ratio >= ratio_floor:
+        return "The volume passes the filter, but the name still needs cleaner price acceptance."
+    return "This does not currently deserve escalation."
 
 
 inject_css()
 render_sidebar()
-st.markdown("## Breakout Confirmation")
 config = get_runtime_app_config()
 selected_symbols = get_selected_symbols()
 render_refresh_bar("breakout_confirmation", config, selected_symbols, live_auth=False, prefer_database=True)
@@ -52,116 +60,114 @@ snapshot, used_cache = load_snapshot_with_feedback(
 errors = snapshot["volume_batch"].errors + snapshot["wall_batch"].errors
 ratio_floor = st.slider("Volume confirmation floor", min_value=1.0, max_value=3.0, value=1.5, step=0.1)
 index_rows = [row for row in snapshot["index_wall_batch"].rows if isinstance(row, WallSignal)]
-index_bias = " | ".join(
-    f"{row.symbol}: {row.wall_type or 'N/A'} wall {row.proximity_pct or 0.0:.2f}% away"
-    for row in index_rows
-)
 confirmed = [signal for signal in snapshot["merged_signals"] if (signal.volume_ratio or 0.0) >= ratio_floor]
+near_actionable = [signal for signal in confirmed if _confirmation_state(signal, ratio_floor) == "Near actionable"]
+watch_candidates = [signal for signal in confirmed if _confirmation_state(signal, ratio_floor) == "Needs trigger"]
+best_ratio = max((signal.volume_ratio or 0.0 for signal in confirmed), default=0.0)
 
 st.markdown(
     """
     <div class="nubra-desk-hero">
-      <div class="nubra-kicker">Setup Filter</div>
-      <h1 class="nubra-desk-title">Needs confirmation</h1>
+      <div class="nubra-kicker">Quality gate</div>
+      <h1 class="nubra-desk-title">Separate noise from setups worth real attention</h1>
       <p class="nubra-desk-copy">
-        This page is the quality gate between raw discovery and deeper work. It should show only the names that still deserve attention after the first scan, while staying honest about how light the current confirmation logic still is.
+        Breakout Confirmation is the filter between raw discovery and deeper work. It should reduce the board, not tell the whole story. High relative volume gets a symbol through the gate; price structure still decides whether it is tradeable.
       </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-cols = st.columns(4)
-with cols[0]:
-    metric_card("Candidates", str(len(confirmed)), "Names still above the current threshold.")
-with cols[1]:
-    metric_card("Ratio floor", f"{ratio_floor:.1f}x", "Current abnormal-volume requirement.", accent="#57b6ff")
-with cols[2]:
-    metric_card("Regime inputs", str(len(index_rows)), "Index pressure layers currently in play.", accent="#f8b84e")
-with cols[3]:
-    metric_card("Best ratio", f"{max((signal.volume_ratio or 0.0 for signal in confirmed), default=0.0):.2f}x", "Strongest candidate left after filtering.", accent="#24c48e")
+metric_cols = st.columns(4)
+with metric_cols[0]:
+    metric_card("Surviving names", str(len(confirmed)), "Names still above the current floor.")
+with metric_cols[1]:
+    metric_card("Near actionable", str(len(near_actionable)), "Volume is already strong enough to justify drilldown.", accent="#22c55e")
+with metric_cols[2]:
+    metric_card("Needs trigger", str(len(watch_candidates)), "Still need cleaner acceptance.", accent="#f5b342")
+with metric_cols[3]:
+    metric_card("Best ratio", f"{best_ratio:.2f}x", "Strongest surviving participation.", accent="#4ea1ff")
 
 if errors:
-    callout("Live data issue", " | ".join(str(error) for error in errors if error))
+    callout("Data issue", " | ".join(str(error) for error in errors if error))
 
-lead_cols = st.columns([1.05, 0.95], gap="large")
-with lead_cols[0]:
-    section_header("Filtered board", "Shortlist that survived the first scan.")
-    confirm_frame = pd.DataFrame(
-        [
-            {
-                "symbol": signal.symbol,
-                "volume ratio": round(signal.volume_ratio or 0.0, 2),
-            }
-            for signal in confirmed[:6]
-        ]
-    )
-    if not confirm_frame.empty:
-        st.bar_chart(confirm_frame.set_index("symbol"), height=255)
+left, right = st.columns([1.15, 0.85], gap="large")
+with left:
+    section_header("Filtered board", "Names that survived the first pass.")
+    if confirmed:
+        chart_frame = pd.DataFrame(
+            [{"symbol": signal.symbol, "volume ratio": round(signal.volume_ratio or 0.0, 2)} for signal in confirmed[:6]]
+        ).set_index("symbol")
+        st.bar_chart(chart_frame, height=270)
     else:
-        callout("No names cleared the filter", "Lower the volume confirmation floor to widen the shortlist.")
-with lead_cols[1]:
-    section_header("Desk read", "Keep the pass-fail logic visible.")
+        callout("No names cleared the filter", "Lower the floor if you want a wider shortlist.")
+
+with right:
+    section_header("What this page means", "Treat it as a gate, not a final verdict.")
     callout(
-        "Current limitation",
-        "This page is still mostly volume-led. It is useful as a tighter shortlist, but not yet a full confirmation engine.",
+        "What passed",
+        "These names have enough abnormal participation to deserve more attention than the rest of the universe.",
+    )
+    callout(
+        "What is still missing",
+        "Actual breakout quality still depends on price acceptance, clean trigger levels, and whether the broader index backdrop supports the move.",
     )
     if confirmed:
         leader = confirmed[0]
         callout(
             "Current leader",
-            f"{leader.symbol} is the strongest surviving name at {leader.volume_ratio or 0.0:.2f}x abnormal volume.",
+            f"{leader.symbol} is the strongest surviving name at {(leader.volume_ratio or 0.0):.2f}x relative volume.",
         )
 
-left, right = st.columns([1.15, 0.95], gap="large")
+left, right = st.columns([1.15, 0.85], gap="large")
 with left:
-    section_header("Shortlist", "The names most worth pushing into symbol drilldown.")
-    for signal in confirmed[:6]:
-        action_cols = st.columns([0.86, 0.14])
-        with action_cols[0]:
-            callout(
-                f"{signal.symbol}  |  {_confirmation_state(signal, ratio_floor)}",
-                "Volume {:.2f}x. Check price acceptance, not just participation, before treating it as executable.".format(signal.volume_ratio or 0.0),
-            )
-        with action_cols[1]:
-            st.write("")
-            if st.button("Open", key=f"confirm_open_{signal.symbol}", use_container_width=True):
-                _open_drilldown(signal.symbol)
-    if not confirmed:
-        callout("No names cleared the filter", "Try lowering the ratio floor to widen the shortlist.")
+    section_header("Shortlist", "Push only these into deeper symbol work.")
+    if confirmed:
+        for signal in confirmed[:8]:
+            row_cols = st.columns([0.84, 0.16], gap="small")
+            with row_cols[0]:
+                callout(
+                    f"{signal.symbol} | {_confirmation_state(signal, ratio_floor)} | {(signal.volume_ratio or 0.0):.2f}x",
+                    _decision_note(signal, ratio_floor),
+                )
+            with row_cols[1]:
+                st.write("")
+                if st.button("Open", key=f"confirm_open_{signal.symbol}", width="stretch"):
+                    _open_drilldown(signal.symbol)
+    else:
+        callout("No shortlist", "There is nothing left after the current filter.")
 
 with right:
-    section_header("Regime filter", "Read each candidate against current index pressure.")
-    confirmation_frame = pd.DataFrame(
-        [
-            {
-                "index": row.symbol,
-                "wall_type": row.wall_type,
-                "Distance from current price (%)": round(row.proximity_pct or 999.0, 2),
-                "bias": row.bias,
-            }
-            for row in index_rows
-        ]
-    )
-    if not confirmation_frame.empty:
-        st.bar_chart(confirmation_frame.set_index("index")[["Distance from current price (%)"]], height=240)
-        st.dataframe(confirmation_frame, use_container_width=True, height=220)
-        if index_bias:
-            callout("Current regime read", index_bias)
+    section_header("Regime filter", "Check the shortlist against index pressure.")
+    if index_rows:
+        regime_frame = pd.DataFrame(
+            [
+                {
+                    "index": row.symbol,
+                    "wall type": row.wall_type,
+                    "distance %": round(row.proximity_pct or 999.0, 2),
+                    "bias": row.bias,
+                }
+                for row in index_rows
+            ]
+        )
+        st.bar_chart(regime_frame.set_index("index")[["distance %"]], height=220)
+        dataframe_card(regime_frame)
     else:
-        callout("No index context yet", "Once the OI scan yields rows, this area becomes the market backdrop panel.")
+        callout("No regime rows yet", "This section becomes useful once OI wall context is available.")
 
-section_header("Filtered table", "Full list left after the current threshold.")
+section_header("Filtered table", "Everything still left after the current threshold.")
 dataframe_card(
     [
         {
             "symbol": signal.symbol,
             "state": _confirmation_state(signal, ratio_floor),
             "volume ratio": round(signal.volume_ratio or 0.0, 2),
-            "decision note": "Still needs actual price confirmation",
+            "decision note": _decision_note(signal, ratio_floor),
         }
         for signal in confirmed
     ]
 )
+
 if used_cache:
     st.caption("Showing cached snapshot data to keep the page responsive.")

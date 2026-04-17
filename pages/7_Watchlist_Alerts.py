@@ -54,7 +54,6 @@ def _watch_note(level: str) -> str:
 
 inject_css()
 render_sidebar()
-st.markdown("## Watchlist + Alerts")
 config = get_runtime_app_config()
 selected_symbols = get_selected_symbols()
 render_refresh_bar("watchlist_alerts", config, selected_symbols, live_auth=False, prefer_database=True)
@@ -81,10 +80,10 @@ errors = snapshot["volume_batch"].errors + snapshot["index_wall_batch"].errors
 st.markdown(
     """
     <div class="nubra-desk-hero">
-      <div class="nubra-kicker">Watchlist</div>
-      <h1 class="nubra-desk-title">Stateful monitor</h1>
+      <div class="nubra-kicker">Monitoring surface</div>
+      <h1 class="nubra-desk-title">Track state changes instead of re-reading the whole board</h1>
       <p class="nubra-desk-copy">
-        This page should read like a monitoring surface, not another ranked board. Keep it focused on changes in state: what is active, what is building, and what is cooling off.
+        Watchlist + Alerts should feel like a stateful monitor. It is where users keep names they care about and see whether they are getting stronger, stalling, or cooling off.
       </p>
     </div>
     """,
@@ -93,17 +92,17 @@ st.markdown(
 
 cols = st.columns(4)
 with cols[0]:
-    metric_card("Watchlist size", str(len(watch_symbols)), "User-defined symbols for follow-up.")
+    metric_card("Watchlist size", str(len(watch_symbols)), "User-defined follow-up set.")
 with cols[1]:
-    metric_card("Active", str(len([row for row in alerts if row["level"] == "Active"])), "Names demanding attention now.", accent="#57b6ff")
+    metric_card("Active", str(len([row for row in alerts if row["level"] == "Active"])), "Names demanding attention now.", accent="#4ea1ff")
 with cols[2]:
-    metric_card("Building", str(len([row for row in alerts if row["level"] == "Building"])), "Names still improving but not yet strong.", accent="#f8b84e")
+    metric_card("Building", str(len([row for row in alerts if row["level"] == "Building"])), "Names improving but not yet clean.", accent="#f5b342")
 with cols[3]:
-    metric_card("Cooling", str(len([row for row in alerts if row["level"] == "Cooling"])), "Names losing urgency.", accent="#24c48e")
+    metric_card("Cooling", str(len([row for row in alerts if row["level"] == "Cooling"])), "Names losing urgency.", accent="#22c55e")
 
 save_cols = st.columns([0.18, 0.82])
 with save_cols[0]:
-    if st.button("Save watchlist", use_container_width=True):
+    if st.button("Save watchlist", width="stretch"):
         save_watchlist_symbols(config, watch_symbols)
         st.success("Watchlist saved to the shared stored workspace.")
 with save_cols[1]:
@@ -113,9 +112,9 @@ with save_cols[1]:
     )
 
 if errors:
-    callout("Live data issue", " | ".join(str(error) for error in errors if error))
+    callout("Data issue", " | ".join(str(error) for error in errors if error))
 
-left, right = st.columns([1.1, 1.0], gap="large")
+left, right = st.columns([1.05, 0.95], gap="large")
 with left:
     section_header("State feed", "What changed inside the monitored set.")
     if recent_events:
@@ -124,14 +123,14 @@ with left:
     elif alerts:
         for alert in alerts[:8]:
             callout(
-                f"{alert['level']}  |  {alert['symbol']}",
+                f"{alert['level']} | {alert['symbol']}",
                 f"Volume {alert['volume_ratio']:.2f}x. {_watch_note(alert['level'])}",
             )
     else:
-        callout("No watchlist alerts yet", "Add symbols from the drilldown page or type a smaller focused list here.")
+        callout("No watchlist alerts yet", "Add symbols from Symbol Drilldown or type a tighter list here.")
 
 with right:
-    section_header("Regime filter", "Broad market pressure still frames the watchlist.")
+    section_header("Market backdrop", "Broad market pressure still frames the watchlist.")
     pressure_frame = pd.DataFrame(
         [
             {
@@ -145,11 +144,12 @@ with right:
     )
     if not pressure_frame.empty:
         st.bar_chart(pressure_frame.set_index("Index")[["Distance from current price (%)"]], height=220)
-        st.dataframe(pressure_frame, use_container_width=True)
+        st.dataframe(pressure_frame, width="stretch")
     else:
-        callout("Index context appears here", "Once index OI rows load, this panel becomes the market backdrop for the watchlist.")
+        callout("Index context appears here", "Once index OI rows load, this panel becomes the backdrop for the watchlist.")
 
 section_header("Watchlist table", "The complete monitored set for this session.")
 dataframe_card(alerts)
+
 if used_cache:
     st.caption("Showing cached snapshot data to keep the page responsive.")

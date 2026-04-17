@@ -54,12 +54,12 @@ def render_sidebar() -> None:
         <div class="nubra-topbar">
           <div class="nubra-topbar-brand">
             <div>
-              <div class="nubra-topbar-kicker">Trader workspace</div>
-              <div class="nubra-topbar-title">Nubra Trading Desk</div>
+              <div class="nubra-topbar-kicker">Reference workspace</div>
+              <div class="nubra-topbar-title">Nubra Signal Discovery</div>
             </div>
-            <div style="display:flex; align-items:center; gap:0.5rem;">
-              <div class="nubra-nav-hint">Scanner | Regime | Workbench</div>
-              <div class="nubra-nav-banner">Switch views</div>
+            <div class="nubra-topbar-meta">
+              <div class="nubra-nav-banner">Built with Nubra APIs</div>
+              <div class="nubra-nav-hint">Volume | Index OI | Structure</div>
             </div>
           </div>
           <div class="nubra-nav-row">
@@ -71,8 +71,28 @@ def render_sidebar() -> None:
     )
 
     st.markdown('<div class="nubra-topbar-spacer"></div>', unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div class="nubra-shell-intro">
+          <div>
+            <div class="nubra-kicker">Reference desk</div>
+            <div class="nubra-shell-title">Choose the market slice, then follow the signal stack.</div>
+            <div class="nubra-shell-copy">
+              This shell is the product layer above Nubra's scanners. It should feel like one coordinated workspace for discovery, confirmation, and options-structure reads, not a bundle of unrelated pages.
+            </div>
+          </div>
+          <div class="nubra-shell-badges">
+            <span class="nubra-chip tone-cyan">Volume breakout</span>
+            <span class="nubra-chip tone-blue">Market pulse</span>
+            <span class="nubra-chip tone-purple">OI structure</span>
+            <span class="nubra-chip tone-amber">Decision workflow</span>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    controls = st.columns([0.18, 0.36, 0.1, 0.16, 0.2], gap="small")
+    controls = st.columns([0.18, 0.35, 0.11, 0.16, 0.2], gap="small")
     with controls[0]:
         st.caption("UNIVERSE")
         selected_basket = st.selectbox(
@@ -83,7 +103,7 @@ def render_sidebar() -> None:
             help="This changes the symbol set used by the stock-signal pages.",
         )
     with controls[1]:
-        st.caption("CUSTOM LIST")
+        st.caption("SYMBOL SET")
         if selected_basket == "Custom":
             selected_custom = st.multiselect(
                 "Custom symbols",
@@ -106,7 +126,7 @@ def render_sidebar() -> None:
         else:
             st.text_input(
                 "Custom symbols",
-                value="Use Custom universe to pick symbols",
+                value="Switch to Custom to choose symbols",
                 disabled=True,
                 label_visibility="collapsed",
             )
@@ -117,7 +137,7 @@ def render_sidebar() -> None:
     st.session_state["nubra_selected_symbols"] = selected_symbols
 
     with controls[2]:
-        st.caption("NAMES")
+        st.caption("COVERAGE")
         st.markdown(
             f"""
             <div class="nubra-inline-metric">
@@ -141,12 +161,12 @@ def render_sidebar() -> None:
     with controls[4]:
         st.caption("PREVIEW")
         symbol_preview = ", ".join(selected_symbols[:3]) if selected_symbols else "No symbols"
-        more = f" +{len(selected_symbols) - 3}" if len(selected_symbols) > 3 else ""
+        more = f"+{len(selected_symbols) - 3} more" if len(selected_symbols) > 3 else "Sample symbols"
         st.markdown(
             f"""
             <div class="nubra-inline-metric">
               <strong>{symbol_preview}</strong>
-              <span>{more if more else "Universe preview"}</span>
+              <span>{more}</span>
             </div>
             """,
             unsafe_allow_html=True,
