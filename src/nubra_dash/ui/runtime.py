@@ -123,11 +123,11 @@ def render_refresh_bar(
             <span class="nubra-status-dot"></span>
             <span class="nubra-refresh-strong">{status_label}</span>
             <span class="nubra-refresh-chip">{mode_label}</span>
-            <span class="nubra-refresh-meta">Age {freshness}</span>
-            <span class="nubra-refresh-meta">Updated {last_updated}</span>
+            <span class="nubra-refresh-meta">{freshness}</span>
+            <span class="nubra-refresh-meta">{last_updated}</span>
           </div>
           <div class="nubra-refresh-side">
-            Shared snapshot view.
+            Shared snapshot view
           </div>
         </div>
         """,
@@ -152,7 +152,7 @@ def render_refresh_bar(
                 st.rerun()
     with middle:
         st.markdown(
-            '<div class="nubra-inline-note">Reload pulls the newest shared snapshot for this page without changing any of the live wiring underneath.</div>',
+            '<div class="nubra-inline-note">Reload pulls the newest stored snapshot without touching the backend wiring.</div>',
             unsafe_allow_html=True,
         )
 

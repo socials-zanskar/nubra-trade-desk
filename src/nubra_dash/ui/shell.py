@@ -12,12 +12,6 @@ from nubra_dash.config import (
 )
 
 
-PAGES = [
-    ("Home", "app.py"),
-    ("Volume Tracker", "pages/2_Volume_Tracker.py"),
-    ("OI Walls", "pages/3_OI_Walls.py"),
-]
-
 NAV_LINKS = [
     ("Home", "/"),
     ("Volume Tracker", "/Volume_Tracker"),
@@ -25,7 +19,7 @@ NAV_LINKS = [
 ]
 
 
-def render_sidebar() -> None:
+def render_sidebar(current_page: str = "Home") -> None:
     config = load_app_config()
     basket_options = get_basket_options()
     active_theme = str(st.session_state.get("nubra_theme", "dark")).lower()
@@ -37,7 +31,10 @@ def render_sidebar() -> None:
     searchable_custom_pool = tuple(dict.fromkeys((*TOP_FNO_SYMBOLS, *LIQUID_STOCKS_SYMBOLS, *MARKET_300_SYMBOLS)))
 
     nav_html = "".join(
-        f'<a class="nubra-nav-link" href="{href}" target="_self">{label}</a>'
+        (
+            f'<a class="nubra-nav-link {"is-active" if label == current_page else ""}" '
+            f'href="{href}" target="_self">{label}</a>'
+        )
         for label, href in NAV_LINKS
     )
     st.markdown(
@@ -59,7 +56,7 @@ def render_sidebar() -> None:
 
     st.markdown('<div class="nubra-topbar-spacer"></div>', unsafe_allow_html=True)
 
-    controls = st.columns([0.21, 0.39, 0.24, 0.16], gap="small")
+    controls = st.columns([0.24, 0.54, 0.22], gap="small")
     with controls[0]:
         st.caption("UNIVERSE")
         selected_basket = st.selectbox(
@@ -94,7 +91,7 @@ def render_sidebar() -> None:
             st.markdown(
                 """
                 <div class="nubra-control-note">
-                  Switch to <strong>Custom</strong> when you want to choose names manually.
+                  Core basket is active. Switch to <strong>Custom</strong> only when you want to hand-pick symbols.
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -106,23 +103,6 @@ def render_sidebar() -> None:
     st.session_state["nubra_selected_symbols"] = selected_symbols
 
     with controls[2]:
-        st.caption("DESK SUMMARY")
-        symbol_preview = ", ".join(selected_symbols[:3]) if selected_symbols else "No symbols"
-        more = f"+{len(selected_symbols) - 3} more" if len(selected_symbols) > 3 else "Focused basket"
-        st.markdown(
-            f"""
-            <div class="nubra-control-summary">
-              <div class="nubra-control-summary-top">
-                <span class="nubra-chip tone-cyan">{len(selected_symbols)} names</span>
-                <span class="nubra-chip tone-purple">{selected_basket}</span>
-              </div>
-              <strong>{symbol_preview}</strong>
-              <span>{more}</span>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with controls[3]:
         st.caption("APPEARANCE")
         theme_choice = st.radio(
             "Appearance",

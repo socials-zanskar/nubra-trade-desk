@@ -33,7 +33,7 @@ def _scanner_note(row: VolumeSignal) -> str:
 
 
 inject_css()
-render_sidebar()
+render_sidebar("Volume Tracker")
 config = get_runtime_app_config()
 selected_symbols = get_selected_symbols()
 render_refresh_bar("volume_tracker", config, selected_symbols, live_auth=False, prefer_database=True)
@@ -58,9 +58,9 @@ if snapshot.get("is_post_close") and eod_summary:
         """
         <div class="nubra-desk-hero">
           <div class="nubra-kicker">Close participation</div>
-          <h1 class="nubra-desk-title">Who actually commanded attention by the bell</h1>
+          <h1 class="nubra-desk-title">Who held attention into the close</h1>
           <p class="nubra-desk-copy">
-            Stored participation board for the names that still held unusual involvement into the close.
+            Stored end-of-day participation board for the names that still mattered by the bell.
           </p>
         </div>
         """,
@@ -118,15 +118,15 @@ if snapshot.get("is_post_close") and eod_summary:
     st.stop()
 
 st.markdown(
-    """
-    <div class="nubra-desk-hero">
-      <div class="nubra-kicker">Volume tracker</div>
-      <h1 class="nubra-desk-title">Participation board</h1>
-      <p class="nubra-desk-copy">
-        Scan abnormal participation fast, then move the strongest names into confirmation.
-      </p>
-    </div>
-    """,
+        """
+        <div class="nubra-desk-hero">
+          <div class="nubra-kicker">Volume tracker</div>
+          <h1 class="nubra-desk-title">Participation board</h1>
+          <p class="nubra-desk-copy">
+            Rank abnormal participation fast and keep only the names worth carrying into setup review.
+          </p>
+        </div>
+        """,
     unsafe_allow_html=True,
 )
 
@@ -164,7 +164,7 @@ if errors:
 
 left, right = st.columns([1.2, 0.8], gap="large")
 with left:
-    section_header("Top participation now", "The strongest scan hits after the active filter.")
+    section_header("Top participation now", "Strongest names after the active filter.")
     if filtered_rows:
         leaderboard = pd.DataFrame(
             [{"symbol": row.symbol, "volume ratio": round(row.volume_ratio or 0.0, 2)} for row in filtered_rows[:8]]
@@ -174,7 +174,7 @@ with left:
         callout("No symbols match the filter", "Lower the ratio threshold or turn off the 2x-only toggle.")
 
 with right:
-    section_header("Desk read", "What the filtered board is saying.")
+    section_header("Desk read", "Quick context for the active shortlist.")
     if filtered_rows:
         lead = filtered_rows[0]
         callout(
@@ -187,9 +187,9 @@ with right:
                 f"{len(filtered_rows)} names survive the filter, with {two_x_spikes} already above 2x participation.",
             )
 
-section_header("Escalation list", "Names most worth pushing into setup review.")
+section_header("Priority list", "Names most worth pushing into setup review.")
 if filtered_rows:
-    for row in filtered_rows[:6]:
+    for row in filtered_rows[:4]:
         callout(
             f"{row.symbol} | {(row.volume_ratio or 0.0):.2f}x",
             _scanner_note(row),
@@ -197,7 +197,7 @@ if filtered_rows:
 else:
     callout("No candidates yet", "Once the filters allow rows through, the strongest names appear here.")
 
-section_header("Scanner table", "Dense output for the active filter.")
+section_header("Live table", "Dense output for the active filter.")
 dataframe_card(
     [
         {

@@ -85,7 +85,7 @@ def _wall_summary(chain_snapshot, wall_signal: WallSignal | None) -> str:
 
 
 inject_css()
-render_sidebar()
+render_sidebar("OI Walls")
 config = get_runtime_app_config()
 selected_symbols = get_selected_symbols()
 render_refresh_bar("oi_walls", config, selected_symbols, live_auth=False, prefer_database=True)
@@ -106,23 +106,21 @@ st.markdown(
     """
     <div class="nubra-desk-hero">
       <div class="nubra-kicker">Nubra index structure</div>
-      <h1 class="nubra-desk-title">See the actual option shelves, not just the scanner label</h1>
+      <h1 class="nubra-desk-title">See the actual option shelves, not just the wall label</h1>
       <p class="nubra-desk-copy">
-        Raw index ladders with the dominant scanner wall overlaid on top.
+        Current-expiry index ladders with the dominant scanner wall overlaid on top.
       </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-cols = st.columns(4)
+cols = st.columns(3)
 with cols[0]:
     metric_card("Tracked indices", str(len(chain_snapshots) or len(wall_rows)), "Benchmarks currently visualized.")
 with cols[1]:
     metric_card("Resolved walls", str(len(wall_rows)), "Dominant current-expiry walls from the scanner.", accent="#4ea1ff")
 with cols[2]:
-    metric_card("Ladders", str(len(chain_snapshots)), "Stored raw option-chain ladders available.", accent="#f5b342")
-with cols[3]:
     metric_card("Mode", "Stored", "Reading shared precomputed ladder snapshots.", accent="#22c55e")
 
 if errors:
@@ -131,48 +129,49 @@ if errors:
 if not chain_snapshots:
     callout("No ladders returned", "No stored ladder snapshot is available yet. Run the backend worker or manual refresh first.")
 
-for chain_snapshot in chain_snapshots:
-    st.write("")
-    wall_signal = wall_map.get(chain_snapshot.symbol)
-    window = slice_chain_window(chain_snapshot.frame, chain_snapshot.spot, strikes_each_side=14)
+if chain_snapshots:
+    tabs = st.tabs([snapshot.symbol for snapshot in chain_snapshots])
+    for tab, chain_snapshot in zip(tabs, chain_snapshots):
+        with tab:
+            wall_signal = wall_map.get(chain_snapshot.symbol)
+            window = slice_chain_window(chain_snapshot.frame, chain_snapshot.spot, strikes_each_side=14)
+            st.markdown(
+                f"""
+                <div class="nubra-control-summary" style="margin-bottom:0.85rem;">
+                  <div class="nubra-control-summary-top">
+                    <span class="nubra-chip tone-purple">{chain_snapshot.symbol}</span>
+                    <span class="nubra-chip tone-cyan">Expiry {chain_snapshot.expiry or 'N/A'}</span>
+                  </div>
+                  <strong>Spot {chain_snapshot.spot:,.2f}</strong>
+                  <span>Wall {wall_signal.wall_type if wall_signal else 'N/A'} {wall_signal.wall_strike if wall_signal and wall_signal.wall_strike is not None else 'N/A'}</span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-    st.markdown(
-        f"""
-        <div class="nubra-desk-hero" style="padding:0.95rem 1rem; margin-bottom:0.8rem;">
-          <div class="nubra-kicker">{chain_snapshot.symbol}</div>
-          <h2 class="nubra-desk-title" style="font-size:1.55rem;">Current-expiry ladder</h2>
-          <p class="nubra-desk-copy" style="max-width:none;">
-            Expiry {chain_snapshot.expiry or 'N/A'} | Spot {chain_snapshot.spot:,.2f} | Wall {wall_signal.wall_type if wall_signal else 'N/A'} {wall_signal.wall_strike if wall_signal and wall_signal.wall_strike is not None else 'N/A'}
-          </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            st.plotly_chart(
+                _build_oi_ladder(window, spot=chain_snapshot.spot, wall_signal=wall_signal),
+                width="stretch",
+            )
 
-    st.plotly_chart(
-        _build_oi_ladder(window, spot=chain_snapshot.spot, wall_signal=wall_signal),
-        width="stretch",
-    )
-
-    left, right = st.columns([0.9, 1.1], gap="large")
-    with left:
-        section_header("Desk read", "What the ladder is saying right now.")
-        callout(chain_snapshot.symbol, _wall_summary(chain_snapshot, wall_signal))
-
-    with right:
-        section_header("Selected ladder rows", "The raw ladder values behind the chart.")
-        dataframe_card(
-            [
-                {
-                    "Strike": row["strike"],
-                    "Call open interest": int(row["call_oi"]),
-                    "Put open interest": int(row["put_oi"]),
-                    "Call traded volume": int(row["call_volume"]),
-                    "Put traded volume": int(row["put_volume"]),
-                }
-                for row in window.to_dict(orient="records")
-            ]
-        )
+            left, right = st.columns([0.8, 1.2], gap="large")
+            with left:
+                section_header("Desk read", "What the ladder is saying right now.")
+                callout(chain_snapshot.symbol, _wall_summary(chain_snapshot, wall_signal))
+            with right:
+                section_header("Selected ladder rows", "Raw ladder values behind the chart.")
+                dataframe_card(
+                    [
+                        {
+                            "Strike": row["strike"],
+                            "Call open interest": int(row["call_oi"]),
+                            "Put open interest": int(row["put_oi"]),
+                            "Call traded volume": int(row["call_volume"]),
+                            "Put traded volume": int(row["put_volume"]),
+                        }
+                        for row in window.to_dict(orient="records")
+                    ]
+                )
 
 if used_cache:
     st.caption("Showing cached ladder data to keep the page responsive.")

@@ -220,12 +220,12 @@ def inject_css() -> None:
             top: 0.7rem;
             left: 1rem;
             right: 1rem;
-            z-index: 999;
+            z-index: 10000;
             padding: 0.55rem 0.65rem;
             border-radius: 1.25rem;
             border: 1px solid var(--color-border);
             background:
-              linear-gradient(180deg, {theme.overlay}, rgba(255,255,255,0.02)),
+              linear-gradient(180deg, color-mix(in srgb, {theme.overlay} 96%, var(--color-bg-alt)), rgba(255,255,255,0.02)),
               linear-gradient(120deg, var(--color-accent-soft), transparent 58%);
             box-shadow: var(--color-shadow);
             backdrop-filter: blur(18px);
@@ -273,7 +273,7 @@ def inject_css() -> None:
           .nubra-topbar-title {{
             margin: 0;
             color: var(--color-text);
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: 800;
             letter-spacing: -0.03em;
           }}
@@ -313,7 +313,7 @@ def inject_css() -> None:
           }}
 
           .nubra-topbar-spacer {{
-            height: 3.8rem;
+            height: 4.4rem;
           }}
 
           .nubra-nav-link {{
@@ -321,7 +321,7 @@ def inject_css() -> None:
             justify-content: center;
             align-items: center;
             min-height: 2.2rem;
-            padding: 0.1rem 0.45rem;
+            padding: 0.1rem 0.75rem;
             border-radius: 0.95rem;
             border: 1px solid var(--color-border);
             background: var(--color-surface-alt);
@@ -340,10 +340,10 @@ def inject_css() -> None:
           }}
 
           .nubra-nav-link.is-active {{
-            background: linear-gradient(135deg, var(--color-accent-soft), rgba(255,255,255,0.04));
-            border-color: rgba(139, 108, 255, 0.36);
+            background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
+            border-color: transparent;
             box-shadow: 0 10px 22px var(--color-glow);
-            color: var(--color-accent) !important;
+            color: var(--color-text-on-accent) !important;
           }}
 
           .trader-strip {{
@@ -355,8 +355,8 @@ def inject_css() -> None:
             justify-content: space-between;
             gap: 0.8rem;
             align-items: center;
-            margin: 0.05rem 0 0.55rem 0;
-            padding: 0.55rem 0.1rem 0.5rem 0.1rem;
+            margin: 0.05rem 0 0.35rem 0;
+            padding: 0.3rem 0.1rem 0.35rem 0.1rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
           }}
 
@@ -406,7 +406,7 @@ def inject_css() -> None:
           }}
 
           .nubra-refresh-side {{
-            max-width: 22rem;
+            max-width: 14rem;
             text-align: right;
             line-height: 1.3;
           }}
@@ -415,7 +415,7 @@ def inject_css() -> None:
             color: var(--color-muted);
             font-size: 0.74rem;
             line-height: 1.35;
-            padding-top: 0.18rem;
+            padding-top: 0.05rem;
           }}
 
           .nubra-card,
