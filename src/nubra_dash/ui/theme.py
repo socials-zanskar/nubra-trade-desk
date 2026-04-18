@@ -229,14 +229,17 @@ def inject_css() -> None:
               linear-gradient(120deg, var(--color-accent-soft), transparent 58%);
             box-shadow: var(--color-shadow);
             backdrop-filter: blur(18px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
           }}
 
           .nubra-topbar-brand {{
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             gap: 0.8rem;
             align-items: center;
-            margin-bottom: 0.45rem;
           }}
 
           .nubra-brand-lockup {{
@@ -303,13 +306,14 @@ def inject_css() -> None:
           }}
 
           .nubra-nav-row {{
-            display: grid;
-            grid-template-columns: repeat(7, minmax(0, 1fr));
+            display: flex;
             gap: 0.4rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
           }}
 
           .nubra-topbar-spacer {{
-            height: 4.8rem;
+            height: 3.8rem;
           }}
 
           .nubra-nav-link {{
@@ -765,8 +769,7 @@ def inject_css() -> None:
 
           @media (max-width: 1100px) {{
             .nubra-grid.cols-4,
-            .nubra-grid.cols-3,
-            .nubra-nav-row {{
+            .nubra-grid.cols-3 {{
               grid-template-columns: repeat(2, minmax(0, 1fr));
             }}
 

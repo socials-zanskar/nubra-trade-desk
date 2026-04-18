@@ -14,22 +14,14 @@ from nubra_dash.config import (
 
 PAGES = [
     ("Home", "app.py"),
-    ("Market Pulse", "pages/1_Market_Pulse.py"),
     ("Volume Tracker", "pages/2_Volume_Tracker.py"),
-    ("Breakout Confirmation", "pages/4_Breakout_Confirmation.py"),
     ("OI Walls", "pages/3_OI_Walls.py"),
-    ("Multi-Wall Explorer", "pages/5_Multi_Wall_Explorer.py"),
-    ("Symbol Drilldown", "pages/6_Symbol_Drilldown.py"),
 ]
 
 NAV_LINKS = [
     ("Home", "/"),
-    ("Market Pulse", "/Market_Pulse"),
     ("Volume Tracker", "/Volume_Tracker"),
-    ("Breakout Confirmation", "/Breakout_Confirmation"),
     ("OI Walls", "/OI_Walls"),
-    ("Multi-Wall Explorer", "/Multi_Wall_Explorer"),
-    ("Symbol Drilldown", "/Symbol_Drilldown"),
 ]
 
 
@@ -54,14 +46,7 @@ def render_sidebar() -> None:
           <div class="nubra-topbar-brand">
             <div class="nubra-brand-lockup">
               <div class="nubra-brand-mark">N</div>
-              <div>
-                <div class="nubra-topbar-kicker">Launch workspace</div>
-                <div class="nubra-topbar-title">Nubra APIs Trading Desk</div>
-              </div>
-            </div>
-            <div class="nubra-topbar-meta">
-              <div class="nubra-nav-banner">Sandbox desk</div>
-              <div class="nubra-nav-hint">Volume scanners | OI structure | Symbol reads</div>
+              <div class="nubra-topbar-title">Nubra APIs Trading Desk</div>
             </div>
           </div>
           <div class="nubra-nav-row">
