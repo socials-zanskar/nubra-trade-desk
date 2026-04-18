@@ -68,24 +68,22 @@ best_ratio = max((signal.volume_ratio or 0.0 for signal in confirmed), default=0
 st.markdown(
     """
     <div class="nubra-desk-hero">
-      <div class="nubra-kicker">Quality gate</div>
-      <h1 class="nubra-desk-title">Separate noise from setups worth real attention</h1>
+      <div class="nubra-kicker">Breakout confirmation</div>
+      <h1 class="nubra-desk-title">Confirmation gate</h1>
       <p class="nubra-desk-copy">
-        Filter between discovery and drilldown. Volume gets a name through the gate; price still decides the trade.
+        Volume gets a name through the gate. Price and structure still decide the trade.
       </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-metric_cols = st.columns(4)
+metric_cols = st.columns(3)
 with metric_cols[0]:
     metric_card("Surviving names", str(len(confirmed)), "Names still above the current floor.")
 with metric_cols[1]:
     metric_card("Near actionable", str(len(near_actionable)), "Volume is already strong enough to justify drilldown.", accent="#22c55e")
 with metric_cols[2]:
-    metric_card("Needs trigger", str(len(watch_candidates)), "Still need cleaner acceptance.", accent="#f5b342")
-with metric_cols[3]:
     metric_card("Best ratio", f"{best_ratio:.2f}x", "Strongest surviving participation.", accent="#4ea1ff")
 
 if errors:
@@ -101,33 +99,6 @@ with left:
         st.bar_chart(chart_frame, height=270)
     else:
         callout("No names cleared the filter", "Lower the floor if you want a wider shortlist.")
-
-with right:
-    section_header("Current lead", "Strongest surviving name.")
-    if confirmed:
-        leader = confirmed[0]
-        callout(
-            "Current leader",
-            f"{leader.symbol} is the strongest surviving name at {(leader.volume_ratio or 0.0):.2f}x relative volume.",
-        )
-
-left, right = st.columns([1.15, 0.85], gap="large")
-with left:
-    section_header("Shortlist", "Push only these into deeper symbol work.")
-    if confirmed:
-        for signal in confirmed[:8]:
-            row_cols = st.columns([0.84, 0.16], gap="small")
-            with row_cols[0]:
-                callout(
-                    f"{signal.symbol} | {_confirmation_state(signal, ratio_floor)} | {(signal.volume_ratio or 0.0):.2f}x",
-                    _decision_note(signal, ratio_floor),
-                )
-            with row_cols[1]:
-                st.write("")
-                if st.button("Open", key=f"confirm_open_{signal.symbol}", width="stretch"):
-                    _open_drilldown(signal.symbol)
-    else:
-        callout("No shortlist", "There is nothing left after the current filter.")
 
 with right:
     section_header("Regime filter", "Check the shortlist against index pressure.")
@@ -147,6 +118,24 @@ with right:
         dataframe_card(regime_frame)
     else:
         callout("No regime rows yet", "This section becomes useful once OI wall context is available.")
+
+left, right = st.columns([1.15, 0.85], gap="large")
+with left:
+    section_header("Shortlist", "Push only these into deeper symbol work.")
+    if confirmed:
+        for signal in confirmed[:8]:
+            row_cols = st.columns([0.84, 0.16], gap="small")
+            with row_cols[0]:
+                callout(
+                    f"{signal.symbol} | {_confirmation_state(signal, ratio_floor)} | {(signal.volume_ratio or 0.0):.2f}x",
+                    _decision_note(signal, ratio_floor),
+                )
+            with row_cols[1]:
+                st.write("")
+                if st.button("Open", key=f"confirm_open_{signal.symbol}", width="stretch"):
+                    _open_drilldown(signal.symbol)
+    else:
+        callout("No shortlist", "There is nothing left after the current filter.")
 
 section_header("Filtered table", "Everything still left after the current threshold.")
 dataframe_card(

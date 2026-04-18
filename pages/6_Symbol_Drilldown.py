@@ -62,33 +62,28 @@ if not symbol:
 st.markdown(
     """
     <div class="nubra-desk-hero">
-      <div class="nubra-kicker">One-name decision page</div>
-      <h1 class="nubra-desk-title">Read one setup before you spend more time on it</h1>
+      <div class="nubra-kicker">Symbol drilldown</div>
+      <h1 class="nubra-desk-title">One-name decision page</h1>
       <p class="nubra-desk-copy">
-        Stored setup summary first, live detail only if the name has already earned more time.
+        Read the setup, the levels, and the backdrop before you spend more time on the name.
       </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-cols = st.columns(4)
+cols = st.columns(3)
 with cols[0]:
     metric_card("Symbol", symbol or "N/A", "Current focus name.")
 with cols[1]:
     metric_card("Volume ratio", f"{(focus.volume_ratio or 0.0):.2f}x" if focus else "N/A", "Participation versus baseline.", accent="#4ea1ff")
 with cols[2]:
     metric_card("Action state", focus.action_state if focus else "N/A", "Stored board state.", accent="#f5b342")
-with cols[3]:
-    metric_card("Confidence", f"{focus.confidence:.0f}" if focus else "N/A", "Worker-computed signal confidence.", accent="#22c55e")
 
 cta_cols = st.columns([0.22, 0.78])
 with cta_cols[0]:
     if symbol and live_detail_enabled and st.button("Load live detail", width="stretch"):
         st.session_state[live_detail_key] = True
-with cta_cols[1]:
-    if focus:
-        callout("Current read", focus.why_now or focus.signal_reason)
 
 if symbol and st.session_state.get(live_detail_key):
     auth_session = load_auth_session(config.auth)
@@ -118,13 +113,12 @@ with left:
             callout("Stored mode only", "Live drilldown is disabled. This page is reading worker-computed summaries from Supabase.")
 
 with right:
-    section_header("Decision read", "This should be enough to decide whether the setup deserves more work.")
+    section_header("Decision read", "Use this to decide whether the setup deserves more work.")
     if focus:
         callout("Setup", f"{focus.setup_type} | {focus.action_state} | confidence {focus.confidence:.0f}")
-        callout("Primary read", focus.why_now or focus.signal_reason)
+        callout("Why now", focus.why_now or focus.signal_reason)
         if stored_drilldown and getattr(stored_drilldown, 'notes', None):
-            for note in stored_drilldown.notes[:3]:
-                callout(symbol or "Stored note", note)
+            callout("Stored note", stored_drilldown.notes[0])
         elif focus.volume_ratio is not None:
             callout("Participation", f"Current candle participation is {focus.volume_ratio:.2f}x versus baseline.")
         levels = []
@@ -146,21 +140,21 @@ with right:
                 ),
             )
 
-section_header("Index wall ladder", "Current-expiry clustered strikes from NIFTY and SENSEX.")
-dataframe_card(
-    [
-        {
-            "Index": row.symbol,
-            "Wall side": row.wall_side,
-            "Rank": row.rank,
-            "Strike": row.strike,
-            "Open interest": row.oi,
-            "Distance from current price (%)": round(row.dist_pct, 2),
-            "Selected wall": row.selected,
-        }
-        for row in wall_ladder
-    ]
-)
+with st.expander("Index wall ladder", expanded=False):
+    dataframe_card(
+        [
+            {
+                "Index": row.symbol,
+                "Wall side": row.wall_side,
+                "Rank": row.rank,
+                "Strike": row.strike,
+                "Open interest": row.oi,
+                "Distance from current price (%)": round(row.dist_pct, 2),
+                "Selected wall": row.selected,
+            }
+            for row in wall_ladder
+        ]
+    )
 
 if used_cache:
     st.caption("Showing cached stored snapshot data to keep the page responsive.")

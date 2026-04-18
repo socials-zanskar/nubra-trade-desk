@@ -120,10 +120,10 @@ if snapshot.get("is_post_close") and eod_summary:
 st.markdown(
     """
     <div class="nubra-desk-hero">
-      <div class="nubra-kicker">Discovery layer</div>
-      <h1 class="nubra-desk-title">Find where participation is changing fastest</h1>
+      <div class="nubra-kicker">Volume tracker</div>
+      <h1 class="nubra-desk-title">Participation board</h1>
       <p class="nubra-desk-copy">
-        Discovery surface for abnormal participation before names move into stricter review.
+        Scan abnormal participation fast, then move the strongest names into confirmation.
       </p>
     </div>
     """,
@@ -151,15 +151,13 @@ else:
 two_x_spikes = len([row for row in volume_rows if (row.volume_ratio or 0.0) >= 2.0])
 three_x_spikes = len([row for row in volume_rows if (row.volume_ratio or 0.0) >= 3.0])
 
-cols = st.columns(4)
+cols = st.columns(3)
 with cols[0]:
-    metric_card("Tracked", str(len(selected_symbols)), "Current scan universe size.")
+    metric_card("Filtered", str(len(filtered_rows)), "Names surviving the active filter.")
 with cols[1]:
     metric_card("Best ratio", f"{top_ratio:.2f}x", "Strongest abnormal participation in this snapshot.", accent="#4ea1ff")
 with cols[2]:
-    metric_card("2x+ spikes", str(two_x_spikes), "Names already demanding more attention.", accent="#f5b342")
-with cols[3]:
-    metric_card("3x+ prints", str(three_x_spikes), "Names behaving like true outliers.", accent="#22c55e")
+    metric_card("2x+/3x+", f"{two_x_spikes}/{three_x_spikes}", "How concentrated the strongest participation is.", accent="#22c55e")
 
 if errors:
     callout("Data issue", " | ".join(str(error) for error in errors if error))
@@ -176,35 +174,28 @@ with left:
         callout("No symbols match the filter", "Lower the ratio threshold or turn off the 2x-only toggle.")
 
 with right:
-    section_header("Current lead", "Strongest filtered participation.")
+    section_header("Desk read", "What the filtered board is saying.")
     if filtered_rows:
         lead = filtered_rows[0]
         callout(
-            f"Lead candidate | {lead.symbol}",
-            f"Participation is running at {(lead.volume_ratio or 0.0):.2f}x versus baseline, with current traded volume at {(lead.current_volume or 0.0):,.0f}.",
+            f"{lead.symbol} leads the scanner",
+            f"Participation is running at {(lead.volume_ratio or 0.0):.2f}x versus baseline with {(lead.current_volume or 0.0):,.0f} current volume.",
         )
-
-left, right = st.columns([1.1, 0.9], gap="large")
-with left:
-    section_header("Forward list", "The names most worth escalating into setup review.")
-    if filtered_rows:
-        for row in filtered_rows[:6]:
+        if len(filtered_rows) > 1:
             callout(
-                f"{row.symbol} | {(row.volume_ratio or 0.0):.2f}x",
-                _scanner_note(row),
+                "Scan concentration",
+                f"{len(filtered_rows)} names survive the filter, with {two_x_spikes} already above 2x participation.",
             )
-    else:
-        callout("No candidates yet", "Once the filters allow rows through, the strongest names appear here.")
 
-with right:
-    section_header("Participation buckets", "How concentrated the scan really is.")
-    bucket_rows = [
-        {"bucket": "3x or higher", "count": len([row for row in volume_rows if (row.volume_ratio or 0.0) >= 3.0])},
-        {"bucket": "2x to 3x", "count": len([row for row in volume_rows if 2.0 <= (row.volume_ratio or 0.0) < 3.0])},
-        {"bucket": "1x to 2x", "count": len([row for row in volume_rows if 1.0 <= (row.volume_ratio or 0.0) < 2.0])},
-        {"bucket": "Below 1x", "count": len([row for row in volume_rows if (row.volume_ratio or 0.0) < 1.0])},
-    ]
-    st.dataframe(pd.DataFrame(bucket_rows), width="stretch", hide_index=True)
+section_header("Escalation list", "Names most worth pushing into setup review.")
+if filtered_rows:
+    for row in filtered_rows[:6]:
+        callout(
+            f"{row.symbol} | {(row.volume_ratio or 0.0):.2f}x",
+            _scanner_note(row),
+        )
+else:
+    callout("No candidates yet", "Once the filters allow rows through, the strongest names appear here.")
 
 section_header("Scanner table", "Dense output for the active filter.")
 dataframe_card(

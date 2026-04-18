@@ -8,6 +8,7 @@ import streamlit as st
 
 from nubra_dash.config import AppConfig
 from nubra_dash.models import MergedSignal, WallSignal
+from nubra_dash.ui.theme import get_plotly_palette
 from nubra_dash.ui.widgets import callout, compact_table
 
 
@@ -45,9 +46,9 @@ def render_mission_control_home(
         f"""
         <div class="nubra-desk-hero">
           <div class="nubra-kicker">Mission control</div>
-          <h1 class="nubra-desk-title">Read the desk before you read individual names</h1>
+          <h1 class="nubra-desk-title">Desk first. Symbols second.</h1>
           <p class="nubra-desk-copy">
-            Home should answer three questions fast: where attention belongs, how strong participation really is, and whether index structure is making the board cleaner or more dangerous.
+            Read the strongest names, the board state, and the index backdrop in one pass.
           </p>
           <p class="nubra-subtle nubra-mission-copy">
             <span class="nubra-chip tone-cyan">{len(selected_symbols)} names</span>
@@ -255,10 +256,10 @@ def _focus_card(title: str, body: str, footer: str, *, accent: str) -> None:
             margin-bottom: 0.5rem;
         ">
           <div style="display:flex; justify-content:space-between; gap:0.4rem; align-items:start;">
-            <div style="font-size:0.85rem; font-weight:700; color:#e8f1f8;">{title}</div>
+            <div style="font-size:0.85rem; font-weight:700; color:var(--color-text);">{title}</div>
             <div style="font-size:0.7rem; color:{accent}; text-transform:uppercase; letter-spacing:0.08em; font-weight:800;">{footer}</div>
           </div>
-          <div style="font-size:0.78rem; color:#9aa9bb; margin-top:0.22rem; line-height:1.38;">{body}</div>
+          <div style="font-size:0.78rem; color:var(--color-muted); margin-top:0.22rem; line-height:1.38;">{body}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -277,10 +278,10 @@ def _event_card(title: str, body: str, footer: str, *, accent: str) -> None:
             margin-bottom: 0.45rem;
         ">
           <div style="display:flex; justify-content:space-between; gap:0.5rem; align-items:start;">
-            <div style="font-size:0.84rem; font-weight:700; color:#e8f1f8;">{title}</div>
-            <div style="font-size:0.66rem; color:#88a3bb; text-transform:uppercase; letter-spacing:0.08em; text-align:right;">{footer}</div>
+            <div style="font-size:0.84rem; font-weight:700; color:var(--color-text);">{title}</div>
+            <div style="font-size:0.66rem; color:var(--color-muted); text-transform:uppercase; letter-spacing:0.08em; text-align:right;">{footer}</div>
           </div>
-          <div style="font-size:0.78rem; color:#9aa9bb; line-height:1.38; margin-top:0.22rem;">{body}</div>
+          <div style="font-size:0.78rem; color:var(--color-muted); line-height:1.38; margin-top:0.22rem;">{body}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -291,7 +292,7 @@ def _rail_header(title: str, subtitle: str) -> str:
     return f"""
     <div style="margin-bottom:0.55rem;">
       <div style="font-size:0.72rem; color:#2ed3b7; text-transform:uppercase; letter-spacing:0.14em; font-weight:700;">{title}</div>
-      <div style="font-size:0.76rem; color:#88a3bb; margin-top:0.12rem;">{subtitle}</div>
+      <div style="font-size:0.76rem; color:var(--color-muted); margin-top:0.12rem;">{subtitle}</div>
     </div>
     """
 
@@ -299,13 +300,14 @@ def _rail_header(title: str, subtitle: str) -> str:
 def _panel_header(title: str, subtitle: str) -> str:
     return f"""
     <div style="margin-bottom:0.55rem;">
-      <div style="font-size:0.86rem; color:#e8f1f8; font-weight:800; letter-spacing:-0.02em;">{title}</div>
-      <div style="font-size:0.76rem; color:#88a3bb; margin-top:0.12rem;">{subtitle}</div>
+      <div style="font-size:0.86rem; color:var(--color-text); font-weight:800; letter-spacing:-0.02em;">{title}</div>
+      <div style="font-size:0.76rem; color:var(--color-muted); margin-top:0.12rem;">{subtitle}</div>
     </div>
     """
 
 
 def _build_momentum_figure(rows: list[MergedSignal]) -> go.Figure:
+    colorscheme = get_plotly_palette()
     frame = pd.DataFrame(
         [
             {
@@ -323,11 +325,11 @@ def _build_momentum_figure(rows: list[MergedSignal]) -> go.Figure:
     colors: list[str] = []
     for _, row in frame.iterrows():
         if row["grade"] == "A":
-            colors.append("#22C55E")
+            colors.append(colorscheme["success"])
         elif row["grade"] == "B":
-            colors.append("#3B82F6")
+            colors.append(colorscheme["accent_2"])
         else:
-            colors.append("#EF4444")
+            colors.append(colorscheme["danger"])
 
     fig = go.Figure()
     fig.add_bar(
@@ -340,31 +342,32 @@ def _build_momentum_figure(rows: list[MergedSignal]) -> go.Figure:
     )
     if not frame.empty:
         top_row = frame.iloc[0]
-        fig.add_vline(x=float(top_row["volume_ratio"]), line_width=1, line_dash="dot", line_color="rgba(255,255,255,0.18)")
+        fig.add_vline(x=float(top_row["volume_ratio"]), line_width=1, line_dash="dot", line_color=colorscheme["zero"])
     fig.update_layout(
         height=460,
         margin=dict(l=10, r=10, t=10, b=10),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor=colorscheme["bg"],
+        plot_bgcolor=colorscheme["bg"],
         showlegend=False,
         xaxis=dict(
             title="Volume ratio",
-            gridcolor="rgba(255,255,255,0.06)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            tickfont=dict(color="#9aa9bb"),
-            title_font=dict(color="#9aa9bb"),
+            gridcolor=colorscheme["grid"],
+            zerolinecolor=colorscheme["zero"],
+            tickfont=dict(color=colorscheme["muted"]),
+            title_font=dict(color=colorscheme["muted"]),
         ),
         yaxis=dict(
             title="Symbol",
-            tickfont=dict(color="#e8f1f8", family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"),
-            title_font=dict(color="#9aa9bb"),
+            tickfont=dict(color=colorscheme["text"], family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"),
+            title_font=dict(color=colorscheme["muted"]),
         ),
-        font=dict(color="#e8f1f8"),
+        font=dict(color=colorscheme["text"]),
     )
     return fig
 
 
 def _build_eod_momentum_figure(rows: tuple[dict[str, object], ...] | list[dict[str, object]]) -> go.Figure:
+    colorscheme = get_plotly_palette()
     frame = pd.DataFrame(
         [
             {
@@ -392,22 +395,22 @@ def _build_eod_momentum_figure(rows: tuple[dict[str, object], ...] | list[dict[s
     fig.update_layout(
         height=460,
         margin=dict(l=10, r=10, t=10, b=10),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor=colorscheme["bg"],
+        plot_bgcolor=colorscheme["bg"],
         showlegend=False,
         xaxis=dict(
             title="Volume ratio",
-            gridcolor="rgba(255,255,255,0.06)",
-            zerolinecolor="rgba(255,255,255,0.08)",
-            tickfont=dict(color="#9aa9bb"),
-            title_font=dict(color="#9aa9bb"),
+            gridcolor=colorscheme["grid"],
+            zerolinecolor=colorscheme["zero"],
+            tickfont=dict(color=colorscheme["muted"]),
+            title_font=dict(color=colorscheme["muted"]),
         ),
         yaxis=dict(
             title="Symbol",
-            tickfont=dict(color="#e8f1f8", family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"),
-            title_font=dict(color="#9aa9bb"),
+            tickfont=dict(color=colorscheme["text"], family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"),
+            title_font=dict(color=colorscheme["muted"]),
         ),
-        font=dict(color="#e8f1f8"),
+        font=dict(color=colorscheme["text"]),
     )
     return fig
 

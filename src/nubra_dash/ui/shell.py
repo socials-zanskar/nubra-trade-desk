@@ -36,6 +36,7 @@ NAV_LINKS = [
 def render_sidebar() -> None:
     config = load_app_config()
     basket_options = get_basket_options()
+    active_theme = str(st.session_state.get("nubra_theme", "dark")).lower()
     selected_basket = st.session_state.get("nubra_selected_basket", config.scans.default_basket)
     if selected_basket not in basket_options:
         selected_basket = config.scans.default_basket
@@ -51,13 +52,16 @@ def render_sidebar() -> None:
         f"""
         <div class="nubra-topbar">
           <div class="nubra-topbar-brand">
-            <div>
-              <div class="nubra-topbar-kicker">Reference workspace</div>
-              <div class="nubra-topbar-title">Nubra Signal Discovery</div>
+            <div class="nubra-brand-lockup">
+              <div class="nubra-brand-mark">N</div>
+              <div>
+                <div class="nubra-topbar-kicker">Launch workspace</div>
+                <div class="nubra-topbar-title">Nubra APIs Trading Desk</div>
+              </div>
             </div>
             <div class="nubra-topbar-meta">
-              <div class="nubra-nav-banner">Built with Nubra APIs</div>
-              <div class="nubra-nav-hint">Volume | Index OI | Structure</div>
+              <div class="nubra-nav-banner">Sandbox desk</div>
+              <div class="nubra-nav-hint">Volume scanners | OI structure | Symbol reads</div>
             </div>
           </div>
           <div class="nubra-nav-row">
@@ -70,7 +74,7 @@ def render_sidebar() -> None:
 
     st.markdown('<div class="nubra-topbar-spacer"></div>', unsafe_allow_html=True)
 
-    controls = st.columns([0.2, 0.46, 0.34], gap="small")
+    controls = st.columns([0.21, 0.39, 0.24, 0.16], gap="small")
     with controls[0]:
         st.caption("UNIVERSE")
         selected_basket = st.selectbox(
@@ -81,7 +85,7 @@ def render_sidebar() -> None:
             help="This changes the symbol set used by the stock-signal pages.",
         )
     with controls[1]:
-        st.caption("SYMBOLS")
+        st.caption("SYMBOL SET")
         if selected_basket == "Custom":
             selected_custom = st.multiselect(
                 "Custom symbols",
@@ -105,7 +109,7 @@ def render_sidebar() -> None:
             st.markdown(
                 """
                 <div class="nubra-control-note">
-                  Symbol picking is available only in <strong>Custom</strong> mode.
+                  Switch to <strong>Custom</strong> when you want to choose names manually.
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -119,13 +123,13 @@ def render_sidebar() -> None:
     with controls[2]:
         st.caption("DESK SUMMARY")
         symbol_preview = ", ".join(selected_symbols[:3]) if selected_symbols else "No symbols"
-        more = f"+{len(selected_symbols) - 3} more" if len(selected_symbols) > 3 else "Focused set"
+        more = f"+{len(selected_symbols) - 3} more" if len(selected_symbols) > 3 else "Focused basket"
         st.markdown(
             f"""
             <div class="nubra-control-summary">
               <div class="nubra-control-summary-top">
                 <span class="nubra-chip tone-cyan">{len(selected_symbols)} names</span>
-                <span class="nubra-chip tone-blue">{selected_basket}</span>
+                <span class="nubra-chip tone-purple">{selected_basket}</span>
               </div>
               <strong>{symbol_preview}</strong>
               <span>{more}</span>
@@ -133,6 +137,18 @@ def render_sidebar() -> None:
             """,
             unsafe_allow_html=True,
         )
+    with controls[3]:
+        st.caption("APPEARANCE")
+        theme_choice = st.radio(
+            "Appearance",
+            options=["Dark", "Light"],
+            index=0 if active_theme == "dark" else 1,
+            horizontal=True,
+            label_visibility="collapsed",
+        )
+        st.session_state["nubra_theme"] = theme_choice.lower()
+
+
 def get_selected_symbols() -> tuple[str, ...]:
     config = load_app_config()
     if "nubra_selected_symbols" in st.session_state and st.session_state["nubra_selected_symbols"]:

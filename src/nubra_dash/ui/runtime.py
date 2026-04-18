@@ -127,7 +127,7 @@ def render_refresh_bar(
             <span class="nubra-refresh-meta">Updated {last_updated}</span>
           </div>
           <div class="nubra-refresh-side">
-            Reload fetches the latest shared view. Upstream refresh is admin-only.
+            Shared snapshot view.
           </div>
         </div>
         """,
@@ -136,9 +136,9 @@ def render_refresh_bar(
 
     admin_refresh_enabled = bool(getattr(config.scans, "enable_admin_refresh", False) and prefer_database and _database_is_configured(config))
     if admin_refresh_enabled:
-        left, admin_col, middle, right = st.columns([0.12, 0.16, 0.39, 0.33], gap="small")
+        left, admin_col, middle = st.columns([0.14, 0.18, 0.68], gap="small")
     else:
-        left, middle, right = st.columns([0.13, 0.52, 0.35], gap="small")
+        left, middle = st.columns([0.14, 0.86], gap="small")
     with left:
         if st.button("Reload", key=f"{page_key}_reload", width="stretch", type="primary"):
             clear_snapshot_cache(config, chosen_symbols, live_auth=live_auth, prefer_database=prefer_database)
@@ -152,15 +152,7 @@ def render_refresh_bar(
                 st.rerun()
     with middle:
         st.markdown(
-            '<div class="nubra-inline-note">Use Reload when you want the newest stored snapshot without waiting for a full page session reset.</div>',
-            unsafe_allow_html=True,
-        )
-    with right:
-        right_note = "Stored mode is the default product path: fast, shared, and stable."
-        if admin_refresh_enabled:
-            right_note = "Admin upstream refresh writes a new shared snapshot for everyone. Most users should stay on stored mode."
-        st.markdown(
-            f'<div class="nubra-inline-note" style="text-align:right;">{right_note}</div>',
+            '<div class="nubra-inline-note">Reload pulls the newest shared snapshot for this page without changing any of the live wiring underneath.</div>',
             unsafe_allow_html=True,
         )
 

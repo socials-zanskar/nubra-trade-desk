@@ -16,13 +16,14 @@ from nubra_dash.models import WallSignal
 from nubra_dash.services import slice_chain_window
 from nubra_dash.ui.runtime import load_snapshot_with_feedback, render_refresh_bar
 from nubra_dash.ui.shell import get_runtime_app_config, get_selected_symbols, render_sidebar
-from nubra_dash.ui.theme import inject_css
+from nubra_dash.ui.theme import get_plotly_palette, inject_css
 from nubra_dash.ui.widgets import callout, dataframe_card, metric_card, section_header
 
 load_local_env()
 
 
 def _build_oi_ladder(frame, *, spot: float, wall_signal: WallSignal | None) -> go.Figure:
+    colorscheme = get_plotly_palette()
     plot_frame = frame.copy()
     plot_frame["call_oi_neg"] = -plot_frame["call_oi"]
     fig = go.Figure()
@@ -31,7 +32,7 @@ def _build_oi_ladder(frame, *, spot: float, wall_signal: WallSignal | None) -> g
         y=plot_frame["strike"],
         orientation="h",
         name="Call open interest",
-        marker_color="#d84c57",
+        marker_color=colorscheme["danger"],
         hovertemplate="Strike %{y}<br>Call open interest %{customdata:,.0f}<extra></extra>",
         customdata=plot_frame["call_oi"],
     )
@@ -40,14 +41,14 @@ def _build_oi_ladder(frame, *, spot: float, wall_signal: WallSignal | None) -> g
         y=plot_frame["strike"],
         orientation="h",
         name="Put open interest",
-        marker_color="#22c55e",
+        marker_color=colorscheme["success"],
         hovertemplate="Strike %{y}<br>Put open interest %{x:,.0f}<extra></extra>",
     )
     fig.add_hline(
         y=spot,
         line_width=2,
         line_dash="dot",
-        line_color="#f5b342",
+        line_color=colorscheme["warning"],
         annotation_text=f"Spot {spot:,.2f}",
         annotation_position="top left",
     )
@@ -55,7 +56,7 @@ def _build_oi_ladder(frame, *, spot: float, wall_signal: WallSignal | None) -> g
         fig.add_hline(
             y=wall_signal.wall_strike,
             line_width=2,
-            line_color="#4ea1ff",
+            line_color=colorscheme["accent_2"],
             annotation_text=f"{wall_signal.wall_type} wall {wall_signal.wall_strike:,.0f}",
             annotation_position="bottom left",
         )
@@ -63,11 +64,11 @@ def _build_oi_ladder(frame, *, spot: float, wall_signal: WallSignal | None) -> g
         barmode="overlay",
         height=620,
         margin=dict(l=10, r=10, t=20, b=10),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(7,16,24,0.72)",
-        font=dict(color="#e6edf6"),
-        xaxis=dict(title="Open interest by strike", zeroline=True, zerolinecolor="#38506f", gridcolor="rgba(72,101,127,0.18)"),
-        yaxis=dict(title="Strike", gridcolor="rgba(72,101,127,0.10)"),
+        paper_bgcolor=colorscheme["bg"],
+        plot_bgcolor=colorscheme["panel"],
+        font=dict(color=colorscheme["text"]),
+        xaxis=dict(title="Open interest by strike", zeroline=True, zerolinecolor=colorscheme["zero"], gridcolor=colorscheme["grid"]),
+        yaxis=dict(title="Strike", gridcolor=colorscheme["grid"]),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
     return fig

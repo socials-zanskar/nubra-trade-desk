@@ -151,24 +151,22 @@ if snapshot.get("is_post_close") and eod_summary:
 st.markdown(
     """
     <div class="nubra-desk-hero">
-      <div class="nubra-kicker">Decision board</div>
-      <h1 class="nubra-desk-title">Read the market in one pass</h1>
+      <div class="nubra-kicker">Market pulse</div>
+      <h1 class="nubra-desk-title">Front board for the current session</h1>
       <p class="nubra-desk-copy">
-        Front board for the names worth time right now and the index pressure around them.
+        The shortest useful read on stock participation and index pressure.
       </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-metric_cols = st.columns(4)
+metric_cols = st.columns(3)
 with metric_cols[0]:
     metric_card("Actionable", str(len(actionable)), "Names closest to a real decision.")
 with metric_cols[1]:
-    metric_card("Building", str(len(build)), "Still interesting, not yet clean.", accent="#4ea1ff")
-with metric_cols[2]:
     metric_card("Best ratio", f"{best_ratio:.2f}x", "Strongest participation on the board.", accent="#f5b342")
-with metric_cols[3]:
+with metric_cols[2]:
     metric_card("Index layers", str(len(index_rows)), "Nearby regime inputs in play.", accent="#22c55e")
 
 if errors:
@@ -200,11 +198,6 @@ with left:
 
 with right:
     section_header("Market backdrop", "Index pressure before symbol conviction.")
-    if top_signal:
-        callout(
-            "Current leader",
-            f"{top_signal.symbol} leads the board at {(top_signal.volume_ratio or 0.0):.2f}x relative volume.",
-        )
     if index_context:
         for row in index_context:
             callout(

@@ -6,8 +6,6 @@ from collections.abc import Iterable, Mapping, Sequence
 import pandas as pd
 import streamlit as st
 
-from nubra_dash.ui.theme import PALETTE
-
 
 def pill(text: str) -> str:
     return status_chip(text, tone="green")
@@ -38,7 +36,7 @@ def metric_card(
     label: str,
     value: str,
     detail: str,
-    accent: str = PALETTE.cyan,
+    accent: str = "var(--color-accent)",
     *,
     trend: str | None = None,
     sparkline_values: Sequence[float] | None = None,
@@ -104,7 +102,7 @@ def stat_card(
     label: str,
     value: str,
     detail: str,
-    accent: str = PALETTE.cyan,
+    accent: str = "var(--color-accent)",
     tone: str | None = None,
     badge: str | None = None,
     *,

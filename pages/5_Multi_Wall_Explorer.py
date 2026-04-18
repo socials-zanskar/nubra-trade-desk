@@ -16,16 +16,17 @@ from nubra_dash.models import OIWallCandidate, WallSignal
 from nubra_dash.services import slice_chain_window
 from nubra_dash.ui.runtime import load_snapshot_with_feedback, render_refresh_bar
 from nubra_dash.ui.shell import get_runtime_app_config, get_selected_symbols, render_sidebar
-from nubra_dash.ui.theme import inject_css
+from nubra_dash.ui.theme import get_plotly_palette, inject_css
 from nubra_dash.ui.widgets import callout, dataframe_card, metric_card, section_header
 
 load_local_env()
 
 
 def _build_focus_figure(frame, *, spot: float, selected_strikes: set[float], selected_side: str | None) -> go.Figure:
+    colorscheme = get_plotly_palette()
     plot_frame = frame.copy()
-    call_colors = ["#4ea1ff" if row["strike"] in selected_strikes and selected_side == "CALL" else "#d84c57" for _, row in plot_frame.iterrows()]
-    put_colors = ["#4ea1ff" if row["strike"] in selected_strikes and selected_side == "PUT" else "#22c55e" for _, row in plot_frame.iterrows()]
+    call_colors = [colorscheme["accent_2"] if row["strike"] in selected_strikes and selected_side == "CALL" else colorscheme["danger"] for _, row in plot_frame.iterrows()]
+    put_colors = [colorscheme["accent_2"] if row["strike"] in selected_strikes and selected_side == "PUT" else colorscheme["success"] for _, row in plot_frame.iterrows()]
     fig = go.Figure()
     fig.add_bar(
         x=-plot_frame["call_oi"],
@@ -44,18 +45,18 @@ def _build_focus_figure(frame, *, spot: float, selected_strikes: set[float], sel
         marker_color=put_colors,
         hovertemplate="Strike %{y}<br>Put open interest %{x:,.0f}<extra></extra>",
     )
-    fig.add_hline(y=spot, line_color="#f5b342", line_width=2, line_dash="dot", annotation_text=f"Spot {spot:,.2f}")
+    fig.add_hline(y=spot, line_color=colorscheme["warning"], line_width=2, line_dash="dot", annotation_text=f"Spot {spot:,.2f}")
     for strike in selected_strikes:
-        fig.add_hline(y=strike, line_color="#4ea1ff", line_width=1.5)
+        fig.add_hline(y=strike, line_color=colorscheme["accent_2"], line_width=1.5)
     fig.update_layout(
         barmode="overlay",
         height=660,
         margin=dict(l=10, r=10, t=20, b=10),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(7,16,24,0.72)",
-        font=dict(color="#e6edf6"),
-        xaxis=dict(title="Open interest by strike", zeroline=True, zerolinecolor="#38506f", gridcolor="rgba(72,101,127,0.18)"),
-        yaxis=dict(title="Strike", gridcolor="rgba(72,101,127,0.10)"),
+        paper_bgcolor=colorscheme["bg"],
+        plot_bgcolor=colorscheme["panel"],
+        font=dict(color=colorscheme["text"]),
+        xaxis=dict(title="Open interest by strike", zeroline=True, zerolinecolor=colorscheme["zero"], gridcolor=colorscheme["grid"]),
+        yaxis=dict(title="Strike", gridcolor=colorscheme["grid"]),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     )
     return fig
