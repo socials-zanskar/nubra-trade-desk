@@ -216,12 +216,10 @@ def inject_css() -> None:
           }}
 
           .nubra-topbar {{
-            position: fixed;
-            top: 0.7rem;
-            left: 1rem;
-            right: 1rem;
-            z-index: 10000;
-            padding: 0.55rem 0.65rem;
+            position: relative;
+            z-index: 2;
+            margin: 0 0 1rem 0;
+            padding: 0.8rem 0.9rem;
             border-radius: 1.25rem;
             border: 1px solid var(--color-border);
             background:
@@ -233,6 +231,7 @@ def inject_css() -> None:
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 0.85rem;
           }}
 
           .nubra-topbar-brand {{
@@ -240,12 +239,20 @@ def inject_css() -> None:
             justify-content: flex-start;
             gap: 0.8rem;
             align-items: center;
+            min-width: 0;
           }}
 
           .nubra-brand-lockup {{
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            min-width: 0;
+          }}
+
+          .nubra-topbar-title-wrap {{
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
           }}
 
           .nubra-brand-mark {{
@@ -259,10 +266,18 @@ def inject_css() -> None:
             color: var(--color-text-on-accent);
             font-weight: 900;
             box-shadow: 0 10px 22px var(--color-glow);
+            overflow: hidden;
+          }}
+
+          .nubra-brand-logo {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
           }}
 
           .nubra-topbar-kicker {{
-            color: var(--color-muted);
+            color: var(--color-accent);
             font-size: 0.66rem;
             text-transform: uppercase;
             letter-spacing: 0.14em;
@@ -310,10 +325,7 @@ def inject_css() -> None:
             gap: 0.4rem;
             justify-content: flex-end;
             flex-wrap: wrap;
-          }}
-
-          .nubra-topbar-spacer {{
-            height: 4.4rem;
+            flex: 1 1 auto;
           }}
 
           .nubra-nav-link {{
@@ -774,12 +786,7 @@ def inject_css() -> None:
             }}
 
             .nubra-topbar {{
-              left: 0.7rem;
-              right: 0.7rem;
-            }}
-
-            .nubra-topbar-spacer {{
-              height: 7.25rem;
+              padding: 0.75rem;
             }}
 
             .nubra-refresh-bar {{

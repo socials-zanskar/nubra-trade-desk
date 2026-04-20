@@ -88,7 +88,6 @@ inject_css()
 render_sidebar("OI Walls")
 config = get_runtime_app_config()
 selected_symbols = get_selected_symbols()
-render_refresh_bar("oi_walls", config, selected_symbols, live_auth=False, prefer_database=True)
 snapshot, used_cache = load_snapshot_with_feedback(
     "Loading OI wall scans...",
     config,
@@ -96,6 +95,7 @@ snapshot, used_cache = load_snapshot_with_feedback(
     live_auth=False,
     prefer_database=True,
 )
+render_refresh_bar("oi_walls", config, selected_symbols, live_auth=False, prefer_database=True)
 
 wall_rows = [row for row in snapshot["index_wall_batch"].rows if isinstance(row, WallSignal)]
 wall_map = {row.symbol: row for row in wall_rows}

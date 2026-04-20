@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import base64
+from pathlib import Path
+
 import streamlit as st
 
 from nubra_dash.config import (
@@ -14,9 +17,19 @@ from nubra_dash.config import (
 
 NAV_LINKS = [
     ("Home", "/"),
-    ("Volume Tracker", "/Volume_Tracker"),
+    ("Volume Breakout", "/Volume_Tracker"),
     ("OI Walls", "/OI_Walls"),
 ]
+
+ROOT = Path(__file__).resolve().parents[3]
+LOGO_PATH = ROOT / "icon128.png"
+
+
+def _load_logo_data_url() -> str:
+    if not LOGO_PATH.exists():
+        return ""
+    encoded = base64.b64encode(LOGO_PATH.read_bytes()).decode("ascii")
+    return f"data:image/png;base64,{encoded}"
 
 
 def render_sidebar(current_page: str = "Home") -> None:
@@ -29,6 +42,7 @@ def render_sidebar(current_page: str = "Home") -> None:
     custom_symbols = st.session_state.get("nubra_custom_symbols", "")
     custom_symbol_values = [item.strip().upper() for item in custom_symbols.split(",") if item.strip()]
     searchable_custom_pool = tuple(dict.fromkeys((*TOP_FNO_SYMBOLS, *LIQUID_STOCKS_SYMBOLS, *MARKET_300_SYMBOLS)))
+    logo_url = _load_logo_data_url()
 
     nav_html = "".join(
         (
@@ -42,8 +56,11 @@ def render_sidebar(current_page: str = "Home") -> None:
         <div class="nubra-topbar">
           <div class="nubra-topbar-brand">
             <div class="nubra-brand-lockup">
-              <div class="nubra-brand-mark">N</div>
-              <div class="nubra-topbar-title">Nubra APIs Trading Desk</div>
+              <div class="nubra-brand-mark">{f'<img src="{logo_url}" alt="Nubra logo" class="nubra-brand-logo" />' if logo_url else 'N'}</div>
+              <div class="nubra-topbar-title-wrap">
+                <div class="nubra-topbar-kicker">Nubra APIs</div>
+                <div class="nubra-topbar-title">Trading Desk</div>
+              </div>
             </div>
           </div>
           <div class="nubra-nav-row">
@@ -53,8 +70,6 @@ def render_sidebar(current_page: str = "Home") -> None:
         """,
         unsafe_allow_html=True,
     )
-
-    st.markdown('<div class="nubra-topbar-spacer"></div>', unsafe_allow_html=True)
 
     controls = st.columns([0.24, 0.54, 0.22], gap="small")
     with controls[0]:
@@ -104,14 +119,17 @@ def render_sidebar(current_page: str = "Home") -> None:
 
     with controls[2]:
         st.caption("APPEARANCE")
-        theme_choice = st.radio(
+        if "nubra_theme" not in st.session_state:
+            st.session_state["nubra_theme"] = active_theme if active_theme in {"dark", "light"} else "dark"
+        st.radio(
             "Appearance",
-            options=["Dark", "Light"],
-            index=0 if active_theme == "dark" else 1,
+            options=["dark", "light"],
+            index=0 if st.session_state["nubra_theme"] == "dark" else 1,
             horizontal=True,
             label_visibility="collapsed",
+            key="nubra_theme",
+            format_func=lambda value: value.capitalize(),
         )
-        st.session_state["nubra_theme"] = theme_choice.lower()
 
 
 def get_selected_symbols() -> tuple[str, ...]:

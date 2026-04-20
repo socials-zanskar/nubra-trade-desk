@@ -106,7 +106,7 @@ def render_refresh_bar(
     generated_at = snapshot.get("generated_at") if snapshot else None
     data_source = snapshot.get("data_source") if snapshot else None
     data_present = _snapshot_has_visible_data(snapshot)
-    last_updated = generated_at.strftime("%d %b %I:%M %p") if isinstance(generated_at, datetime) else ("Ready in session" if data_present else "Waiting for refresh")
+    last_updated = _format_snapshot_timestamp(generated_at) if isinstance(generated_at, datetime) else ("Session data ready" if data_present else "Waiting for refresh")
     freshness = _format_snapshot_age(generated_at) if isinstance(generated_at, datetime) else ("Session view" if data_present else "No snapshot yet")
     status_label = _resolve_status_label(
         data_source=data_source,
@@ -193,6 +193,14 @@ def _format_snapshot_age(generated_at: datetime) -> str:
     hours = age_seconds // 3600
     minutes = (age_seconds % 3600) // 60
     return f"{hours}h {minutes}m ago"
+
+
+def _format_snapshot_timestamp(generated_at: datetime) -> str:
+    suffix = generated_at.strftime("%Z").strip()
+    timestamp = generated_at.strftime("%d %b %I:%M %p")
+    if suffix:
+        timestamp = f"{timestamp} {suffix}"
+    return f"Data as of {timestamp}"
 
 
 def _resolve_status_label(

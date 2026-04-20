@@ -24,19 +24,18 @@ load_local_env()
 def _scanner_note(row: VolumeSignal) -> str:
     ratio = row.volume_ratio or 0.0
     if ratio >= 3.0:
-        return "This is real participation. It deserves immediate validation against structure."
+        return "This is a real volume breakout. It deserves immediate validation against structure."
     if ratio >= 2.0:
-        return "Strong abnormal volume. Keep it on the front board."
+        return "Strong breakout volume. Keep it on the front board."
     if ratio >= 1.2:
-        return "Interesting, but still more discovery than conviction."
+        return "Interesting, but still more breakout watch than conviction."
     return "Visible activity, not yet meaningful."
 
 
 inject_css()
-render_sidebar("Volume Tracker")
+render_sidebar("Volume Breakout")
 config = get_runtime_app_config()
 selected_symbols = get_selected_symbols()
-render_refresh_bar("volume_tracker", config, selected_symbols, live_auth=False, prefer_database=True)
 snapshot, used_cache = load_snapshot_with_feedback(
     "Loading stock volume snapshot...",
     config,
@@ -44,6 +43,7 @@ snapshot, used_cache = load_snapshot_with_feedback(
     live_auth=False,
     prefer_database=True,
 )
+render_refresh_bar("volume_tracker", config, selected_symbols, live_auth=False, prefer_database=True)
 
 volume_rows = [row for row in snapshot["volume_batch"].rows if isinstance(row, VolumeSignal)]
 eod_summary = snapshot.get("eod_summary")
@@ -57,10 +57,10 @@ if snapshot.get("is_post_close") and eod_summary:
     st.markdown(
         """
         <div class="nubra-desk-hero">
-          <div class="nubra-kicker">Close participation</div>
-          <h1 class="nubra-desk-title">Who held attention into the close</h1>
+          <div class="nubra-kicker">Close breakout</div>
+          <h1 class="nubra-desk-title">Who still looked like a volume breakout by the close</h1>
           <p class="nubra-desk-copy">
-            Stored end-of-day participation board for the names that still mattered by the bell.
+            Stored end-of-day breakout board for the names that still mattered by the bell.
           </p>
         </div>
         """,
@@ -71,15 +71,15 @@ if snapshot.get("is_post_close") and eod_summary:
     with cols[0]:
         metric_card("Top symbol", str(summary.get("top_symbol") or "None"), "Strongest stored leader.")
     with cols[1]:
-        metric_card("Top ratio", f"{float(summary.get('top_volume_ratio') or 0.0):.2f}x", "Best abnormal participation at the close.", accent="#4ea1ff")
+        metric_card("Top ratio", f"{float(summary.get('top_volume_ratio') or 0.0):.2f}x", "Best breakout volume at the close.", accent="#4ea1ff")
     with cols[2]:
         metric_card("Priority names", str(summary.get("priority_signals") or 0), "Names worth revisiting after the bell.", accent="#f5b342")
     with cols[3]:
-        metric_card("Stored rows", str(len(leaders)), "Saved participation leaders for the session.", accent="#22c55e")
+        metric_card("Stored rows", str(len(leaders)), "Saved breakout leaders for the session.", accent="#22c55e")
 
     left, right = st.columns([1.2, 0.8], gap="large")
     with left:
-        section_header("Close participation board", "Best names from the final stored summary.")
+        section_header("Close breakout board", "Best names from the final stored summary.")
         if leaders:
             leaderboard = pd.DataFrame(
                 [{"symbol": row.get("symbol"), "volume ratio": round(float(row.get("volume_ratio") or 0.0), 2)} for row in leaders[:10]]
@@ -98,13 +98,13 @@ if snapshot.get("is_post_close") and eod_summary:
                 ]
             )
         else:
-            callout("No close participation yet", "The post-close sync will populate this board.")
+            callout("No close breakout yet", "The post-close sync will populate this board.")
 
     with right:
-        section_header("Close read", "What the participation board says after the bell.")
+        section_header("Close read", "What the breakout board says after the bell.")
         callout(
             "Strongest name",
-            f"{summary.get('top_symbol') or 'None'} closed as the strongest participation name at {float(summary.get('top_volume_ratio') or 0.0):.2f}x.",
+            f"{summary.get('top_symbol') or 'None'} closed as the strongest breakout name at {float(summary.get('top_volume_ratio') or 0.0):.2f}x.",
         )
         callout(
             "Index backdrop",
@@ -120,10 +120,10 @@ if snapshot.get("is_post_close") and eod_summary:
 st.markdown(
         """
         <div class="nubra-desk-hero">
-          <div class="nubra-kicker">Volume tracker</div>
-          <h1 class="nubra-desk-title">Participation board</h1>
+          <div class="nubra-kicker">Volume breakout</div>
+          <h1 class="nubra-desk-title">Volume breakout dashboard</h1>
           <p class="nubra-desk-copy">
-            Rank abnormal participation fast and keep only the names worth carrying into setup review.
+            Rank names by relative volume breakout and keep only the ones worth carrying into setup review.
           </p>
         </div>
         """,
@@ -155,16 +155,16 @@ cols = st.columns(3)
 with cols[0]:
     metric_card("Filtered", str(len(filtered_rows)), "Names surviving the active filter.")
 with cols[1]:
-    metric_card("Best ratio", f"{top_ratio:.2f}x", "Strongest abnormal participation in this snapshot.", accent="#4ea1ff")
+    metric_card("Best ratio", f"{top_ratio:.2f}x", "Strongest relative-volume breakout in this snapshot.", accent="#4ea1ff")
 with cols[2]:
-    metric_card("2x+/3x+", f"{two_x_spikes}/{three_x_spikes}", "How concentrated the strongest participation is.", accent="#22c55e")
+    metric_card("2x+/3x+", f"{two_x_spikes}/{three_x_spikes}", "How concentrated the strongest breakout volume is.", accent="#22c55e")
 
 if errors:
     callout("Data issue", " | ".join(str(error) for error in errors if error))
 
 left, right = st.columns([1.2, 0.8], gap="large")
 with left:
-    section_header("Top participation now", "Strongest names after the active filter.")
+    section_header("Top breakouts now", "Strongest names after the active filter.")
     if filtered_rows:
         leaderboard = pd.DataFrame(
             [{"symbol": row.symbol, "volume ratio": round(row.volume_ratio or 0.0, 2)} for row in filtered_rows[:8]]
@@ -174,17 +174,17 @@ with left:
         callout("No symbols match the filter", "Lower the ratio threshold or turn off the 2x-only toggle.")
 
 with right:
-    section_header("Desk read", "Quick context for the active shortlist.")
+    section_header("Breakout read", "Quick context for the active shortlist.")
     if filtered_rows:
         lead = filtered_rows[0]
         callout(
-            f"{lead.symbol} leads the scanner",
-            f"Participation is running at {(lead.volume_ratio or 0.0):.2f}x versus baseline with {(lead.current_volume or 0.0):,.0f} current volume.",
+            f"{lead.symbol} leads the breakout scan",
+            f"Volume is running at {(lead.volume_ratio or 0.0):.2f}x versus baseline with {(lead.current_volume or 0.0):,.0f} current volume.",
         )
         if len(filtered_rows) > 1:
             callout(
-                "Scan concentration",
-                f"{len(filtered_rows)} names survive the filter, with {two_x_spikes} already above 2x participation.",
+                "Breakout concentration",
+                f"{len(filtered_rows)} names survive the filter, with {two_x_spikes} already above 2x relative volume.",
             )
 
 section_header("Priority list", "Names most worth pushing into setup review.")
@@ -197,7 +197,7 @@ if filtered_rows:
 else:
     callout("No candidates yet", "Once the filters allow rows through, the strongest names appear here.")
 
-section_header("Live table", "Dense output for the active filter.")
+section_header("Breakout table", "Dense output for the active filter.")
 dataframe_card(
     [
         {
