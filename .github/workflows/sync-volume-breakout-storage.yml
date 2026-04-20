@@ -3,12 +3,22 @@ name: Sync Volume Breakout Storage
 on:
   workflow_dispatch:
   schedule:
-    - cron: "20,50 4-9 * * 1-5"
-    - cron: "15 10 * * 1-5"
+    # IST 09:53-15:23, every 30 minutes, offset from crowded GitHub cron minutes.
+    - cron: "23,53 4-9 * * 1-5"
+    # IST 15:48 final post-close storage pass.
+    - cron: "18 10 * * 1-5"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-volume-breakout-storage
+  cancel-in-progress: false
 
 jobs:
   sync-volume-breakout:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,4 +50,7 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           SCAN_SYMBOLS_CSV: data/universes/nifty300_symbols.csv
           NUBRA_DEVICE_ID: Nubra-OSS-${{ secrets.PHONE_NO }}
-        run: python scripts/sync_volume_breakout_store.py --environment PROD --lookback-days 3 --batch-size 5
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "UTC now: $(date -u '+%Y-%m-%d %H:%M:%S')"
+          python scripts/sync_volume_breakout_store.py --environment PROD --lookback-days 3 --batch-size 5

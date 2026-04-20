@@ -3,14 +3,25 @@ name: Sync Supabase Snapshots
 on:
   workflow_dispatch:
   schedule:
-    - cron: "45,55 3 * * 1-5"
-    - cron: "*/10 4-9 * * 1-5"
-    - cron: "0 10 * * 1-5"
-    - cron: "5 10 * * 1-5"
+    # Market-hours sync in IST, offset from crowded GitHub cron minutes.
+    # UTC 03:47/03:57 = IST 09:17/09:27 pre-open checks.
+    - cron: "47,57 3 * * 1-5"
+    # UTC 04:07-09:57 = IST 09:37-15:27, every 10 minutes.
+    - cron: "7,17,27,37,47,57 4-9 * * 1-5"
+    # UTC 10:07 = IST 15:37 final post-close snapshot.
+    - cron: "7 10 * * 1-5"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-supabase-snapshots
+  cancel-in-progress: false
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,4 +55,7 @@ jobs:
           SCAN_REFRESH_MINUTES: ${{ secrets.SCAN_REFRESH_MINUTES }}
           SCAN_SYMBOL_SOURCE: csv
           SCAN_SYMBOLS_CSV: data/universes/nifty300_symbols.csv
-        run: python scripts/sync_supabase_snapshots.py
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "UTC now: $(date -u '+%Y-%m-%d %H:%M:%S')"
+          python scripts/sync_supabase_snapshots.py
