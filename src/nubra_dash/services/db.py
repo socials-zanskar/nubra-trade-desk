@@ -65,6 +65,20 @@ def apply_schema(connection, schema_sql: str) -> None:
     connection.commit()
 
 
+def missing_core_relations(
+    connection,
+    relations: Iterable[str] | None = None,
+) -> tuple[str, ...]:
+    expected = tuple(relations or ("public.symbols", "public.volume_snapshots_latest", "public.sync_runs"))
+    missing: list[str] = []
+    with connection.cursor() as cursor:
+        for relation in expected:
+            cursor.execute("select to_regclass(%s)", (relation,))
+            if cursor.fetchone()[0] is None:
+                missing.append(relation)
+    return tuple(missing)
+
+
 def load_latest_volume_batch(
     connection,
     symbols: Iterable[str],

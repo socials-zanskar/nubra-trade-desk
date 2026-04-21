@@ -24,6 +24,7 @@ from nubra_dash.services.db import (
     SyncStats,
     apply_schema,
     connect_db,
+    missing_core_relations,
     store_index_multi_walls,
     store_symbol_drilldowns,
     store_signal_board,
@@ -69,7 +70,12 @@ def main() -> int:
     option_chains = fetch_index_option_chains(auth_session.market_data)
 
     with connect_db(config.database) as connection:
-        apply_schema(connection, SUPABASE_SCHEMA.read_text(encoding="utf-8"))
+        missing_relations = missing_core_relations(connection)
+        if missing_relations:
+            logger.info("Bootstrapping Supabase schema | missing_relations=%s", ", ".join(missing_relations))
+            apply_schema(connection, SUPABASE_SCHEMA.read_text(encoding="utf-8"))
+        else:
+            logger.info("Supabase schema already present; skipping bootstrap apply.")
         stats = run_sync(
             connection=connection,
             scanned_at=snapshot["generated_at"],
