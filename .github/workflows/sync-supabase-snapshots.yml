@@ -3,13 +3,12 @@ name: Sync Supabase Snapshots
 on:
   workflow_dispatch:
   schedule:
-    # Market-hours sync in IST, offset from crowded GitHub cron minutes.
-    # UTC 03:47/03:57 = IST 09:17/09:27 pre-open checks.
-    - cron: "47,57 3 * * 1-5"
-    # UTC 04:07-09:57 = IST 09:37-15:27, every 10 minutes.
-    - cron: "7,17,27,37,47,57 4-9 * * 1-5"
-    # UTC 10:07 = IST 15:37 final post-close snapshot.
-    - cron: "7 10 * * 1-5"
+    # GitHub can delay/drop very frequent schedule events. Trigger every
+    # 30 minutes, then run three 10-minute passes inside the same job.
+    # UTC 03:47 = IST 09:17.
+    - cron: "47 3 * * 1-5"
+    # UTC 04:17-09:47 = IST 09:47-15:17.
+    - cron: "17,47 4-9 * * 1-5"
 
 permissions:
   contents: read
@@ -21,7 +20,7 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,4 +57,15 @@ jobs:
         run: |
           echo "Triggered by: ${{ github.event_name }}"
           echo "UTC now: $(date -u '+%Y-%m-%d %H:%M:%S')"
-          python scripts/sync_supabase_snapshots.py
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python scripts/sync_supabase_snapshots.py
+          else
+            for attempt in 1 2 3; do
+              echo "Snapshot pass ${attempt}/3"
+              python scripts/sync_supabase_snapshots.py
+              if [ "$attempt" != "3" ]; then
+                echo "Sleeping 10 minutes before next snapshot pass..."
+                sleep 600
+              fi
+            done
+          fi
